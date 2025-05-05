@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MessageCircle, AlertTriangle, Users, LogOut, Edit, ChevronRight } from "lucide-react";
+import { MessageCircle, AlertTriangle, Users, LogOut, Edit, ChevronRight, Bell, BookOpen, FileText, History } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -105,34 +105,100 @@ const HomeResponsaveis = () => {
         </div>
 
         {/* Funcionalidades */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Denúncias */}
           <Card className="p-6">
             <div className="flex items-center gap-4 mb-4">
-              <div className="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center">
-                <MessageCircle className="h-6 w-6 text-green-600" />
+              <div className="h-12 w-12 bg-red-100 rounded-full flex items-center justify-center">
+                <AlertTriangle className="h-6 w-6 text-red-600" />
               </div>
               <div>
-                <h3 className="font-semibold">Escuta Digital</h3>
-                <p className="text-gray-600">Comunique-se com a escola</p>
+                <h3 className="font-semibold">Denúncias</h3>
+                <p className="text-sm text-gray-500">Envie denúncias em nome do(s) filho(s)</p>
               </div>
             </div>
-            <Button className="w-full" onClick={() => navigate("/escuta-digital")}>
+            <Button className="w-full" onClick={() => navigate("/denuncia")}>
+              Fazer Denúncia
+            </Button>
+          </Card>
+
+          {/* Histórico de Denúncias */}
+          <Card className="p-6">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="h-12 w-12 bg-purple-100 rounded-full flex items-center justify-center">
+                <History className="h-6 w-6 text-purple-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Histórico de Denúncias</h3>
+                <p className="text-sm text-gray-500">Acompanhe o andamento das denúncias</p>
+              </div>
+            </div>
+            <Button className="w-full" onClick={() => navigate("/historico-denuncias")}>
+              Ver Histórico
+            </Button>
+          </Card>
+
+          {/* Comunicação com a Escola */}
+          <Card className="p-6">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <MessageCircle className="h-6 w-6 text-blue-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Comunicação</h3>
+                <p className="text-sm text-gray-500">Comunique-se com a instituição</p>
+              </div>
+            </div>
+            <Button className="w-full" onClick={() => navigate("/comunicacao")}>
               Acessar
             </Button>
           </Card>
 
+          {/* Materiais Educativos */}
+          <Card className="p-6">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center">
+                <BookOpen className="h-6 w-6 text-green-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Materiais Educativos</h3>
+                <p className="text-sm text-gray-500">Acesse materiais sobre acolhimento e prevenção</p>
+              </div>
+            </div>
+            <Button className="w-full" onClick={() => navigate("/materiais")}>
+              Ver Materiais
+            </Button>
+          </Card>
+
+          {/* Notificações */}
           <Card className="p-6">
             <div className="flex items-center gap-4 mb-4">
               <div className="h-12 w-12 bg-amber-100 rounded-full flex items-center justify-center">
-                <AlertTriangle className="h-6 w-6 text-amber-600" />
+                <Bell className="h-6 w-6 text-amber-600" />
               </div>
               <div>
-                <h3 className="font-semibold">Denúncia</h3>
-                <p className="text-gray-600">Reporte situações de risco</p>
+                <h3 className="font-semibold">Notificações</h3>
+                <p className="text-sm text-gray-500">Alertas e respostas da escola</p>
               </div>
             </div>
-            <Button className="w-full" onClick={() => navigate("/denuncia")}>
-              Acessar
+            <Button className="w-full" onClick={() => navigate("/notificacoes")}>
+              Ver Notificações
+            </Button>
+          </Card>
+
+          {/* Documentos */}
+          <Card className="p-6">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="h-12 w-12 bg-gray-100 rounded-full flex items-center justify-center">
+                <FileText className="h-6 w-6 text-gray-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Documentos</h3>
+                <p className="text-sm text-gray-500">Acesse documentos importantes</p>
+              </div>
+            </div>
+            <Button className="w-full" onClick={() => navigate("/documentos")}>
+              Ver Documentos
             </Button>
           </Card>
         </div>

@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, AlertTriangle, BookOpen, Users, BarChart, Settings, Bell, User, LogOut, MessageSquare, FileText, BarChart2, ArrowLeft, ArrowUp, ArrowDown } from "lucide-react";
+import { MessageCircle, AlertTriangle, BookOpen, Users, BarChart, Settings, Bell, User, LogOut, MessageSquare, FileText, BarChart2, ArrowLeft, ArrowUp, ArrowDown, PieChart, LineChart } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
 const HomeInstitucional = () => {
@@ -20,30 +20,27 @@ const HomeInstitucional = () => {
               <p className="text-gray-500 text-xs">Último acesso: 15/04/2023</p>
             </div>
           </div>
-          <div className="flex flex-col md:ml-auto gap-2">
-            <div className="flex flex-col gap-2">
-              <Button 
-                variant="outline" 
-                className="flex items-center gap-2"
-                onClick={() => navigate("/editar-perfil")}
-              >
-                <User className="h-4 w-4" />
-                Editar Perfil
-              </Button>
-              <Button 
-                variant="outline" 
-                className="flex items-center gap-2"
-                onClick={() => {
-                  // Aqui você implementaria a lógica de logout
-                  // Por exemplo, limpar o token de autenticação
-                  localStorage.removeItem('token');
-                  navigate("/login-institucional");
-                }}
-              >
-                <LogOut className="h-4 w-4" />
-                Sair
-              </Button>
-            </div>
+          
+          <div className="flex flex-col gap-2">
+            <Button 
+              variant="outline" 
+              className="flex items-center gap-2"
+              onClick={() => navigate("/editar-perfil")}
+            >
+              <User className="h-4 w-4" />
+              Editar Perfil
+            </Button>
+            <Button 
+              variant="outline" 
+              className="flex items-center gap-2"
+              onClick={() => {
+                localStorage.removeItem('token');
+                navigate("/login-institucional");
+              }}
+            >
+              <LogOut className="h-4 w-4" />
+              Sair
+            </Button>
           </div>
         </div>
       </Card>
@@ -66,28 +63,7 @@ const HomeInstitucional = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Card className="p-6 hover:shadow-md transition-shadow">
-          <div className="flex flex-col h-full">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
-                <MessageSquare className="h-6 w-6 text-blue-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold">Escuta Digital</h3>
-                <p className="text-sm text-gray-500">Acompanhe e responda às escutas dos alunos.</p>
-              </div>
-            </div>
-            <div className="mt-auto">
-              <Button 
-                onClick={() => navigate("/gerenciar-escutas")}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                Gerenciar escutas
-              </Button>
-            </div>
-          </div>
-        </Card>
-
+        {/* Gestão de Alunos e Responsáveis */}
         <Card className="p-6 hover:shadow-md transition-shadow">
           <div className="flex flex-col h-full">
             <div className="flex items-center gap-4 mb-4">
@@ -95,8 +71,8 @@ const HomeInstitucional = () => {
                 <Users className="h-6 w-6 text-purple-600" />
               </div>
               <div>
-                <h3 className="font-semibold">Gestão de Alunos</h3>
-                <p className="text-sm text-gray-500">Gerencie os dados e acompanhamento dos alunos</p>
+                <h3 className="font-semibold">Gestão de Alunos e Responsáveis</h3>
+                <p className="text-sm text-gray-500">Gerencie alunos e seus responsáveis vinculados</p>
               </div>
             </div>
             <div className="mt-auto">
@@ -104,12 +80,59 @@ const HomeInstitucional = () => {
                 onClick={() => navigate("/gestao-alunos")}
                 className="w-full bg-purple-600 hover:bg-purple-700 text-white"
               >
-                Gerenciar alunos
+                Gerenciar
               </Button>
             </div>
           </div>
         </Card>
 
+        {/* Relatórios e Gráficos */}
+        <Card className="p-6 hover:shadow-md transition-shadow">
+          <div className="flex flex-col h-full">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
+                <BarChart2 className="h-6 w-6 text-blue-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Relatórios e Gráficos</h3>
+                <p className="text-sm text-gray-500">Visualize dados e estatísticas</p>
+              </div>
+            </div>
+            <div className="mt-auto">
+              <Button 
+                onClick={() => navigate("/relatorios")}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Ver Relatórios
+              </Button>
+            </div>
+          </div>
+        </Card>
+
+        {/* Painel de Comunicação */}
+        <Card className="p-6 hover:shadow-md transition-shadow">
+          <div className="flex flex-col h-full">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
+                <MessageSquare className="h-6 w-6 text-green-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Painel de Comunicação</h3>
+                <p className="text-sm text-gray-500">Gerencie comunicações com responsáveis</p>
+              </div>
+            </div>
+            <div className="mt-auto">
+              <Button 
+                onClick={() => navigate("/comunicacao")}
+                className="w-full bg-green-600 hover:bg-green-700 text-white"
+              >
+                Acessar
+              </Button>
+            </div>
+          </div>
+        </Card>
+
+        {/* Denúncias */}
         <Card className="p-6 hover:shadow-md transition-shadow">
           <div className="flex flex-col h-full">
             <div className="flex items-center gap-4 mb-4">
@@ -118,64 +141,44 @@ const HomeInstitucional = () => {
               </div>
               <div>
                 <h3 className="font-semibold">Denúncias</h3>
-                <p className="text-sm text-gray-500">Gerencie e acompanhe as denúncias recebidas.</p>
+                <p className="text-sm text-gray-500">Gerencie e acompanhe denúncias</p>
               </div>
             </div>
             <div className="mt-auto">
               <Button 
-                onClick={() => navigate("/gerenciar-denuncias")}
+                onClick={() => navigate("/denuncias")}
                 className="w-full bg-red-600 hover:bg-red-700 text-white"
               >
-                Ver denúncias
+                Ver Denúncias
               </Button>
             </div>
           </div>
         </Card>
 
-        <Card className="p-6 hover:shadow-md transition-shadow">
-          <div className="flex flex-col h-full">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
-                <FileText className="h-6 w-6 text-green-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold">Materiais Educativos</h3>
-                <p className="text-sm text-gray-500">Gerencie os materiais educativos disponíveis.</p>
-              </div>
-            </div>
-            <div className="mt-auto">
-              <Button 
-                onClick={() => navigate("/gerenciar-materiais")}
-                className="w-full bg-green-600 hover:bg-green-700 text-white"
-              >
-                Gerenciar materiais
-              </Button>
-            </div>
-          </div>
-        </Card>
-
+        {/* Materiais Educativos */}
         <Card className="p-6 hover:shadow-md transition-shadow">
           <div className="flex flex-col h-full">
             <div className="flex items-center gap-4 mb-4">
               <div className="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center">
-                <BarChart2 className="h-6 w-6 text-amber-600" />
+                <BookOpen className="h-6 w-6 text-amber-600" />
               </div>
               <div>
-                <h3 className="font-semibold">Relatórios</h3>
-                <p className="text-sm text-gray-500">Acesse relatórios e análises</p>
+                <h3 className="font-semibold">Materiais Educativos</h3>
+                <p className="text-sm text-gray-500">Gerencie materiais de prevenção</p>
               </div>
             </div>
             <div className="mt-auto">
               <Button 
-                onClick={() => navigate("/relatorios")}
+                onClick={() => navigate("/materiais")}
                 className="w-full bg-amber-600 hover:bg-amber-700 text-white"
               >
-                Ver Relatórios
+                Gerenciar Materiais
               </Button>
             </div>
           </div>
         </Card>
 
+        {/* Configurações */}
         <Card className="p-6 hover:shadow-md transition-shadow">
           <div className="flex flex-col h-full">
             <div className="flex items-center gap-4 mb-4">

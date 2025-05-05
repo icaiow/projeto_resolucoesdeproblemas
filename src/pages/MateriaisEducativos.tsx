@@ -1,104 +1,163 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, BookOpen, Download, Search, FileText } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Input } from "@/components/ui/input";
+import { ArrowLeft, Search, Book, FileText, Video, Download, Filter } from "lucide-react";
 
 const MateriaisEducativos = () => {
+  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoriaSelecionada, setCategoriaSelecionada] = useState("todos");
+
+  // Dados simulados dos materiais
   const materiais = [
     {
-      id: "1",
-      titulo: "Guia de Cidadania Digital",
-      categoria: "Cidadania Digital",
-      descricao: "Aprenda sobre segurança online, privacidade e comportamento ético na internet.",
-      data: "15/04/2023",
-      arquivo: "guia-cidadania-digital.pdf",
+      id: 1,
+      titulo: "Guia de Prevenção ao Bullying",
+      tipo: "PDF",
+      categoria: "Prevenção",
+      descricao: "Material completo sobre como identificar e prevenir situações de bullying.",
+      data: "15/04/2024",
       tamanho: "2.5 MB"
     },
     {
-      id: "2",
-      titulo: "Prevenção ao Cyberbullying",
-      categoria: "Prevenção",
-      descricao: "Entenda o que é cyberbullying, como identificar e como se proteger.",
-      data: "12/04/2023",
-      arquivo: "prevencao-cyberbullying.pdf",
-      tamanho: "1.8 MB"
+      id: 2,
+      titulo: "Saúde Mental na Adolescência",
+      tipo: "Vídeo",
+      categoria: "Saúde",
+      descricao: "Vídeo educativo sobre saúde mental e bem-estar emocional.",
+      data: "10/04/2024",
+      duracao: "15:30"
     },
     {
-      id: "3",
-      titulo: "Uso Responsável das Redes Sociais",
-      categoria: "Redes Sociais",
-      descricao: "Dicas e orientações para um uso seguro e responsável das redes sociais.",
-      data: "10/04/2023",
-      arquivo: "uso-redes-sociais.pdf",
-      tamanho: "3.2 MB"
+      id: 3,
+      titulo: "Uso Seguro da Internet",
+      tipo: "PDF",
+      categoria: "Educação Digital",
+      descricao: "Guia prático sobre segurança na internet e redes sociais.",
+      data: "05/04/2024",
+      tamanho: "1.8 MB"
     }
   ];
 
+  const categorias = [
+    { id: "todos", nome: "Todos" },
+    { id: "prevencao", nome: "Prevenção" },
+    { id: "saude", nome: "Saúde" },
+    { id: "educacao-digital", nome: "Educação Digital" }
+  ];
+
+  const materiaisFiltrados = materiais.filter(material => {
+    const matchSearch = material.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                       material.descricao.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchCategoria = categoriaSelecionada === "todos" || 
+                          material.categoria.toLowerCase() === categoriaSelecionada;
+    return matchSearch && matchCategoria;
+  });
+
+  const getIconePorTipo = (tipo: string) => {
+    switch (tipo) {
+      case "PDF":
+        return <FileText className="h-6 w-6 text-red-500" />;
+      case "Vídeo":
+        return <Video className="h-6 w-6 text-blue-500" />;
+      default:
+        return <Book className="h-6 w-6 text-gray-500" />;
+    }
+  };
+
   return (
-    <div className="max-w-4xl mx-auto py-8">
-      <div className="flex items-center gap-4 mb-8">
-        <Link to="/home-alunos">
-          <Button variant="ghost" size="icon">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-        </Link>
-        <h1 className="text-2xl font-bold">Materiais Educativos</h1>
-      </div>
-
-      <Card className="p-6 mb-8">
-        <div className="flex items-center gap-4 mb-4">
-          <div className="bg-blue-500 p-2 rounded-full">
-            <BookOpen className="h-6 w-6 text-white" />
-          </div>
-          <div>
-            <h2 className="text-xl font-semibold">Recursos para Aprendizado</h2>
-            <p className="text-gray-600">Acesse materiais sobre cidadania digital, prevenção e temas importantes.</p>
-          </div>
-        </div>
-        <div className="flex gap-4">
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <input
-                type="text"
-                placeholder="Buscar materiais..."
-                className="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-          <Button variant="outline" className="border-blue-500 text-blue-500 hover:bg-blue-50">
-            Filtrar
+    <div className="min-h-screen bg-gray-50 p-4">
+      <div className="max-w-4xl mx-auto space-y-6">
+        <div className="flex items-center justify-between">
+          <Button variant="outline" onClick={() => navigate("/home-alunos")}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Voltar
           </Button>
         </div>
-      </Card>
 
-      <div className="space-y-6">
-        {materiais.map((material) => (
-          <Card key={material.id} className="p-6">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="font-medium">{material.titulo}</h3>
-                <p className="text-sm text-gray-500 mt-1">
-                  {material.categoria} • Publicado em: {material.data}
-                </p>
-              </div>
-              <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800">
-                {material.tamanho}
-              </span>
-            </div>
-            <p className="text-sm text-gray-600 mt-2">{material.descricao}</p>
-            <div className="mt-4 flex justify-between items-center">
-              <div className="flex items-center gap-2 text-sm text-gray-500">
-                <FileText className="h-4 w-4" />
-                <span>{material.arquivo}</span>
-              </div>
-              <Button variant="ghost" size="sm" className="text-blue-500 hover:text-blue-600">
-                <Download className="h-4 w-4 mr-2" />
-                Baixar
+        <div>
+          <h1 className="text-2xl font-bold mb-2">Materiais Educativos</h1>
+          <p className="text-gray-600">
+            Acesse materiais educativos sobre diversos temas importantes
+          </p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Buscar materiais..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <div className="flex gap-2">
+            {categorias.map((categoria) => (
+              <Button
+                key={categoria.id}
+                variant={categoriaSelecionada === categoria.id ? "default" : "outline"}
+                onClick={() => setCategoriaSelecionada(categoria.id)}
+                className="flex items-center gap-2"
+              >
+                <Filter className="h-4 w-4" />
+                {categoria.nome}
               </Button>
-            </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid gap-4">
+          {materiaisFiltrados.map((material) => (
+            <Card key={material.id} className="p-6">
+              <div className="space-y-4">
+                <div className="flex items-start gap-4">
+                  <div className="h-12 w-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                    {getIconePorTipo(material.tipo)}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="font-semibold text-lg">{material.titulo}</h3>
+                        <span className="inline-block px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                          {material.categoria}
+                        </span>
+                      </div>
+                      <span className="text-sm text-gray-500">
+                        {material.data}
+                      </span>
+                    </div>
+                    <p className="text-gray-600 mt-2">{material.descricao}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-4 border-t">
+                  <div className="text-sm text-gray-500">
+                    {material.tipo === "PDF" ? (
+                      <span>Tamanho: {material.tamanho}</span>
+                    ) : (
+                      <span>Duração: {material.duracao}</span>
+                    )}
+                  </div>
+                  <Button className="flex items-center gap-2">
+                    <Download className="h-4 w-4" />
+                    Baixar Material
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+
+        {materiaisFiltrados.length === 0 && (
+          <Card className="p-6 text-center">
+            <p className="text-gray-500">
+              Nenhum material encontrado com os filtros selecionados.
+            </p>
           </Card>
-        ))}
+        )}
       </div>
     </div>
   );

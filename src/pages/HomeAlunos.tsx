@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, BookOpen, Bell, User, LogOut, ArrowLeft } from "lucide-react";
+import { ChevronRight, BookOpen, Bell, User, LogOut, ArrowLeft, Users, MessageCircle, Calendar, FileText } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -71,20 +71,113 @@ const HomeAlunos = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <Card className="p-6 hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="bg-blue-500 p-2 rounded-full">
-              <BookOpen className="h-6 w-6 text-white" />
+          <div className="flex flex-col h-full">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
+                <User className="h-6 w-6 text-blue-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Meu Perfil</h3>
+                <p className="text-sm text-gray-500">Visualize e edite suas informações</p>
+              </div>
             </div>
-            <div>
-              <h3 className="font-semibold">Materiais Educativos</h3>
-              <p className="text-sm text-gray-600">Acesse materiais sobre cidadania digital, prevenção e temas importantes.</p>
+            <div className="mt-auto">
+              <Button 
+                onClick={() => navigate("/perfil-aluno")}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Ver Perfil
+              </Button>
             </div>
           </div>
-          <Link to="/materiais-educativos">
-            <Button className="w-full bg-blue-500 text-white hover:bg-blue-600">
-              Ver materiais
-            </Button>
-          </Link>
+        </Card>
+
+        <Card className="p-6 hover:shadow-md transition-shadow">
+          <div className="flex flex-col h-full">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="h-12 w-12 rounded-full bg-purple-100 flex items-center justify-center">
+                <Users className="h-6 w-6 text-purple-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Responsáveis</h3>
+                <p className="text-sm text-gray-500">Visualize seus responsáveis vinculados</p>
+              </div>
+            </div>
+            <div className="mt-auto">
+              <Button 
+                onClick={() => navigate("/responsaveis-aluno")}
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+              >
+                Ver Responsáveis
+              </Button>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-6 hover:shadow-md transition-shadow">
+          <div className="flex flex-col h-full">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
+                <MessageCircle className="h-6 w-6 text-green-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Espaço de Escuta</h3>
+                <p className="text-sm text-gray-500">Compartilhe seus pensamentos</p>
+              </div>
+            </div>
+            <div className="mt-auto">
+              <Button 
+                onClick={() => navigate("/escuta-aluno")}
+                className="w-full bg-green-600 hover:bg-green-700 text-white"
+              >
+                Acessar
+              </Button>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-6 hover:shadow-md transition-shadow">
+          <div className="flex flex-col h-full">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="h-12 w-12 rounded-full bg-yellow-100 flex items-center justify-center">
+                <Calendar className="h-6 w-6 text-yellow-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Eventos e Campanhas</h3>
+                <p className="text-sm text-gray-500">Acompanhe as atividades da escola</p>
+              </div>
+            </div>
+            <div className="mt-auto">
+              <Button 
+                onClick={() => navigate("/eventos-campanhas")}
+                className="w-full bg-yellow-600 hover:bg-yellow-700 text-white"
+              >
+                Ver Eventos
+              </Button>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-6 hover:shadow-md transition-shadow">
+          <div className="flex flex-col h-full">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center">
+                <FileText className="h-6 w-6 text-red-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Materiais Educativos</h3>
+                <p className="text-sm text-gray-500">Acesse conteúdos importantes</p>
+              </div>
+            </div>
+            <div className="mt-auto">
+              <Button 
+                onClick={() => navigate("/materiais-educativos")}
+                className="w-full bg-red-600 hover:bg-red-700 text-white"
+              >
+                Ver Materiais
+              </Button>
+            </div>
+          </div>
         </Card>
       </div>
 

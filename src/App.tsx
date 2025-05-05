@@ -37,6 +37,15 @@ import Relatorios from "./pages/Relatorios";
 import Configuracoes from "./pages/Configuracoes";
 import GestaoAlunos from "./pages/GestaoAlunos";
 import CadastroResponsavel from "./pages/CadastroResponsavel";
+import PerfilAluno from "./pages/PerfilAluno";
+import ResponsaveisAluno from "./pages/ResponsaveisAluno";
+import EscutaAluno from "./pages/EscutaAluno";
+import EventosCampanhas from "./pages/EventosCampanhas";
+import HistoricoDenuncias from "./pages/HistoricoDenuncias";
+import Comunicacao from "./pages/Comunicacao";
+import Materiais from "./pages/Materiais";
+import Notificacoes from "./pages/Notificacoes";
+import Documentos from "./pages/Documentos";
 
 const queryClient = new QueryClient();
 
@@ -61,6 +70,11 @@ const App = () => (
             <Route path="/informar-prevenir" element={<InformarPrevenir />} />
             <Route path="/gestao-institucional" element={<GestaoInstitucional />} />
             <Route path="/denuncia" element={<Denuncia />} />
+            <Route path="/historico-denuncias" element={<HistoricoDenuncias />} />
+            <Route path="/comunicacao" element={<Comunicacao />} />
+            <Route path="/materiais" element={<Materiais />} />
+            <Route path="/notificacoes" element={<Notificacoes />} />
+            <Route path="/documentos" element={<Documentos />} />
             <Route path="/monitoramento" element={<Monitoramento />} />
             <Route path="/home-alunos" element={<HomeAlunos />} />
             <Route path="/home-responsaveis" element={<HomeResponsaveis />} />
@@ -80,6 +94,10 @@ const App = () => (
             <Route path="/relatorios" element={<Relatorios />} />
             <Route path="/configuracoes" element={<Configuracoes />} />
             <Route path="/gestao-alunos" element={<GestaoAlunos />} />
+            <Route path="/perfil-aluno" element={<PerfilAluno />} />
+            <Route path="/responsaveis-aluno" element={<ResponsaveisAluno />} />
+            <Route path="/escuta-aluno" element={<EscutaAluno />} />
+            <Route path="/eventos-campanhas" element={<EventosCampanhas />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
