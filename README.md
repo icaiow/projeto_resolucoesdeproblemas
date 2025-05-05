@@ -1,8 +1,10 @@
-# Portal de Gestão Escolar
+# Ambiente Escolar Seguro
 
 ## 📋 Sobre o Projeto
 
-O Portal de Gestão Escolar é uma plataforma web desenvolvida para facilitar a comunicação e gestão entre instituições de ensino, alunos e responsáveis. O sistema oferece funcionalidades específicas para cada tipo de usuário, promovendo um ambiente escolar mais seguro e integrado.
+Plataforma integrada para acolhimento, prevenção e gestão do bem-estar escolar.
+Desenvolvida para conectar instituições de ensino, responsáveis e alunos em prol de um ambiente mais humano, empático e seguro.
+
 
 ## 🚀 Funcionalidades
 
