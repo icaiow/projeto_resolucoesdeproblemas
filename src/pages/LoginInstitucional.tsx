@@ -57,7 +57,7 @@ const LoginInstitucional = () => {
             <div className="flex justify-center mb-4">
               <div className="h-12 w-12 rounded-md bg-purple-light"></div>
             </div>
-            <h1 className="text-2xl font-bold">NoHate</h1>
+            <h1 className="text-2xl font-bold">Entre com uma conta</h1>
             <h2 className="text-xl font-semibold mt-6">Área da Instituição</h2>
             <p className="text-gray-600 mt-2">
               Acesse para gerenciar sua instituição de ensino
