@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, MessageCircle, Shield, BookOpen, Bell, User, LogOut, AlertTriangle, ArrowLeft } from "lucide-react";
+import { ChevronRight, BookOpen, Bell, User, LogOut, ArrowLeft } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -41,8 +41,6 @@ const HomeAlunos = () => {
               variant="outline" 
               className="flex items-center gap-2"
               onClick={() => {
-                // Aqui você implementaria a lógica de logout
-                // Por exemplo, limpar o token de autenticação
                 localStorage.removeItem('token');
                 navigate("/login-alunos");
               }}
@@ -74,40 +72,6 @@ const HomeAlunos = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <Card className="p-6 hover:shadow-md transition-shadow">
           <div className="flex items-center gap-4 mb-4">
-            <div className="bg-green-bright p-2 rounded-full">
-              <MessageCircle className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <h3 className="font-semibold">Escuta Digital</h3>
-              <p className="text-sm text-gray-600">Compartilhe suas experiências, dúvidas ou sugestões com a equipe pedagógica.</p>
-            </div>
-          </div>
-          <Link to="/escuta-digital">
-            <Button className="w-full bg-green-bright text-white hover:bg-green-bright/90">
-              Iniciar escuta
-            </Button>
-          </Link>
-        </Card>
-
-        <Card className="p-6 hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="bg-red-500 p-2 rounded-full">
-              <AlertTriangle className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <h3 className="font-semibold">Denúncia</h3>
-              <p className="text-sm text-gray-600">Reporte situações de bullying, discriminação ou assédio de forma segura.</p>
-            </div>
-          </div>
-          <Link to="/denuncia">
-            <Button className="w-full bg-red-500 text-white hover:bg-red-600">
-              Fazer denúncia
-            </Button>
-          </Link>
-        </Card>
-
-        <Card className="p-6 hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-4 mb-4">
             <div className="bg-blue-500 p-2 rounded-full">
               <BookOpen className="h-6 w-6 text-white" />
             </div>
@@ -134,25 +98,6 @@ const HomeAlunos = () => {
           </Link>
         </div>
         <div className="space-y-4">
-          <div className="flex gap-4 pb-4 border-b">
-            <div className="w-1 bg-green-bright rounded-full"></div>
-            <div className="flex-1">
-              <div className="flex justify-between">
-                <h3 className="font-medium">Escuta Digital #2478</h3>
-                <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">Respondido</span>
-              </div>
-              <p className="text-sm text-gray-500 mt-1">Sua escuta sobre a aula de matemática foi respondida.</p>
-              <div className="flex justify-between items-center mt-2">
-                <span className="text-xs text-gray-400">12/04/2023</span>
-                <Link to="/atividades/escuta/2478">
-                  <Button variant="ghost" size="sm" className="text-purple hover:text-purple-dark">
-                    Ver resposta
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-
           <div className="flex gap-4 pb-4 border-b">
             <div className="w-1 bg-amber-500 rounded-full"></div>
             <div className="flex-1">
@@ -189,20 +134,6 @@ const HomeAlunos = () => {
                 </Link>
               </div>
             </div>
-          </div>
-        </div>
-      </Card>
-
-      <Card className="p-6">
-        <h2 className="text-xl font-semibold mb-4">Histórico de Relatos</h2>
-        <div className="space-y-4">
-          <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded">
-            <p className="text-green-800 font-medium">Seu relato foi recebido com atenção pela instituição X.</p>
-            <span className="text-xs text-gray-500">Enviado em: 12/04/2023</span>
-          </div>
-          <div className="bg-gray-50 border-l-4 border-gray-300 p-4 rounded">
-            <p className="text-gray-700">Relato anterior analisado e respondido.</p>
-            <span className="text-xs text-gray-500">Enviado em: 05/03/2023</span>
           </div>
         </div>
       </Card>

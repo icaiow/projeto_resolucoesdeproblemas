@@ -10,8 +10,8 @@ const Index = () => {
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Bem-vindo à Plataforma Educacional</h1>
           <p className="text-lg text-gray-600">Escolha como deseja acessar a plataforma</p>
-        </div>
-
+            </div>
+            
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Link to="/login-institucional" className="block">
             <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer">
@@ -30,7 +30,7 @@ const Index = () => {
               <div className="flex flex-col items-center text-center">
                 <div className="bg-green-bright p-3 rounded-full mb-4">
                   <GraduationCap className="h-8 w-8 text-white" />
-                </div>
+            </div>
                 <h2 className="text-xl font-semibold mb-2">Aluno</h2>
                 <p className="text-gray-600">Acesso para alunos da instituição</p>
               </div>
@@ -49,7 +49,7 @@ const Index = () => {
             </Card>
           </Link>
         </div>
-      </div>
+          </div>
     </div>
   );
 };

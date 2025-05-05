@@ -75,7 +75,7 @@ const AlunoView = () => {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Voltar
           </Button>
-        </div>
+      </div>
 
         {/* Informações do Aluno */}
         <Card className="p-6">
@@ -83,14 +83,14 @@ const AlunoView = () => {
             <div className="h-16 w-16 bg-blue-100 rounded-full flex items-center justify-center">
               <GraduationCap className="h-8 w-8 text-blue-500" />
             </div>
-            <div>
+              <div>
               <h1 className="text-2xl font-bold">{aluno.nome}</h1>
               <p className="text-gray-600">{aluno.turma}</p>
               <p className="text-sm text-gray-500">Matrícula: {aluno.matricula}</p>
               <p className="text-sm text-gray-500">Escola: {aluno.escola}</p>
             </div>
-          </div>
-        </Card>
+            </div>
+          </Card>
 
         {/* Atividades Recentes */}
         <div>
@@ -101,7 +101,7 @@ const AlunoView = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     {getTipoIcon(atividade.tipo)}
-                    <div>
+                  <div>
                       <h3 className="font-semibold">{atividade.titulo}</h3>
                       <p className="text-sm text-gray-500">{atividade.data}</p>
                     </div>
@@ -115,14 +115,14 @@ const AlunoView = () => {
                       onClick={() => navigate(`/atividades/${atividade.tipo}/${atividade.id}`)}
                     >
                       Ver Detalhes
-                    </Button>
+                        </Button>
                   </div>
                 </div>
               </Card>
             ))}
-          </div>
-        </div>
-
+                    </div>
+                  </div>
+                  
         {/* Ações Rápidas */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card className="p-6">
@@ -130,14 +130,14 @@ const AlunoView = () => {
               <div className="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center">
                 <MessageCircle className="h-6 w-6 text-green-600" />
               </div>
-              <div>
+                      <div>
                 <h3 className="font-semibold">Escuta Digital</h3>
                 <p className="text-gray-600">Comunique-se com a escola</p>
-              </div>
-            </div>
+                    </div>
+                  </div>
             <Button className="w-full" onClick={() => navigate("/escuta-digital")}>
               Acessar
-            </Button>
+                      </Button>
           </Card>
 
           <Card className="p-6">
