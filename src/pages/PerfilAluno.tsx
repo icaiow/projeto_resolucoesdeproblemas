@@ -1,201 +1,179 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { ArrowLeft, Camera, Save, X } from "lucide-react";
-import { toast } from "sonner";
+import { ArrowLeft, User, Users, Mail, Phone, MapPin, BookOpen } from "lucide-react";
 
 const PerfilAluno = () => {
   const navigate = useNavigate();
-  const [editando, setEditando] = useState(false);
+  const { id } = useParams();
 
   // Dados simulados do aluno
-  const [aluno, setAluno] = useState({
+  const aluno = {
+    id: id,
     nome: "João Silva",
-    email: "joao.silva@escola.com",
     matricula: "2024001",
-    turma: "9º Ano A",
-    dataNascimento: "15/05/2009",
+    turma: "8º Ano A",
+    dataNascimento: "15/05/2010",
+    endereco: "Rua Exemplo, 123 - Bairro Centro",
+    email: "joao.silva@escola.com",
     telefone: "(11) 98765-4321",
-    endereco: "Rua das Flores, 123 - Jardim Primavera",
-    responsavel: "Maria Silva"
-  });
-
-  const [dadosEditados, setDadosEditados] = useState(aluno);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setDadosEditados(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleSalvar = () => {
-    setAluno(dadosEditados);
-    setEditando(false);
-    toast.success("Perfil atualizado com sucesso!");
-  };
-
-  const handleCancelar = () => {
-    setDadosEditados(aluno);
-    setEditando(false);
+    responsaveis: [
+      {
+        id: 1,
+        nome: "Maria Silva",
+        parentesco: "Mãe",
+        email: "maria.silva@email.com",
+        telefone: "(11) 91234-5678"
+      },
+      {
+        id: 2,
+        nome: "José Silva",
+        parentesco: "Pai",
+        email: "jose.silva@email.com",
+        telefone: "(11) 99876-5432"
+      }
+    ]
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
-          <Button variant="outline" onClick={() => navigate("/home-alunos")}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
+    <div className="container mx-auto p-6">
+      <div className="space-y-6">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold mb-2">Perfil do Aluno</h1>
+            <p className="text-gray-600">
+              Informações detalhadas do aluno e seus responsáveis
+            </p>
+          </div>
+          <Button 
+            variant="outline" 
+            onClick={() => navigate("/gestao-alunos")}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
             Voltar
           </Button>
         </div>
 
-        <div>
-          <h1 className="text-2xl font-bold mb-2">Meu Perfil</h1>
-          <p className="text-gray-600">
-            Visualize e edite suas informações pessoais
-          </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Informações Pessoais */}
+          <Card className="p-6">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <User className="h-6 w-6 text-blue-600" />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold">Informações Pessoais</h2>
+                <p className="text-sm text-gray-500">Dados cadastrais do aluno</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm text-gray-500">Nome Completo</p>
+                <p className="font-medium">{aluno.nome}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Matrícula</p>
+                <p className="font-medium">{aluno.matricula}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Turma</p>
+                <p className="font-medium">{aluno.turma}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Data de Nascimento</p>
+                <p className="font-medium">{aluno.dataNascimento}</p>
+              </div>
+            </div>
+          </Card>
+
+          {/* Contato */}
+          <Card className="p-6">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center">
+                <Mail className="h-6 w-6 text-green-600" />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold">Contato</h2>
+                <p className="text-sm text-gray-500">Informações de contato</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Mail className="h-4 w-4 text-gray-400" />
+                <div>
+                  <p className="text-sm text-gray-500">Email</p>
+                  <p className="font-medium">{aluno.email}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Phone className="h-4 w-4 text-gray-400" />
+                <div>
+                  <p className="text-sm text-gray-500">Telefone</p>
+                  <p className="font-medium">{aluno.telefone}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-gray-400" />
+                <div>
+                  <p className="text-sm text-gray-500">Endereço</p>
+                  <p className="font-medium">{aluno.endereco}</p>
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          {/* Responsáveis */}
+          <Card className="p-6">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="h-12 w-12 bg-purple-100 rounded-full flex items-center justify-center">
+                <Users className="h-6 w-6 text-purple-600" />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold">Responsáveis</h2>
+                <p className="text-sm text-gray-500">Responsáveis vinculados</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {aluno.responsaveis.map((responsavel) => (
+                <Card key={responsavel.id} className="p-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold">{responsavel.nome}</h3>
+                      <span className="text-sm text-gray-500">{responsavel.parentesco}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Mail className="h-4 w-4 text-gray-400" />
+                      <p className="text-sm">{responsavel.email}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Phone className="h-4 w-4 text-gray-400" />
+                      <p className="text-sm">{responsavel.telefone}</p>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </Card>
         </div>
 
-        <Card className="p-6">
-          <div className="space-y-6">
-            {/* Foto do Perfil */}
-            <div className="flex flex-col items-center">
-              <div className="relative">
-                <div className="h-32 w-32 rounded-full bg-gray-200 flex items-center justify-center">
-                  <span className="text-4xl text-gray-500">
-                    {aluno.nome.charAt(0)}
-                  </span>
-                </div>
-                {editando && (
-                  <Button
-                    size="icon"
-                    variant="secondary"
-                    className="absolute bottom-0 right-0 rounded-full"
-                  >
-                    <Camera className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            {/* Informações do Perfil */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="nome">Nome Completo</Label>
-                <Input
-                  id="nome"
-                  name="nome"
-                  value={editando ? dadosEditados.nome : aluno.nome}
-                  onChange={handleInputChange}
-                  disabled={!editando}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email">E-mail</Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={editando ? dadosEditados.email : aluno.email}
-                  onChange={handleInputChange}
-                  disabled={!editando}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="matricula">Matrícula</Label>
-                <Input
-                  id="matricula"
-                  name="matricula"
-                  value={editando ? dadosEditados.matricula : aluno.matricula}
-                  onChange={handleInputChange}
-                  disabled={true}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="turma">Turma</Label>
-                <Input
-                  id="turma"
-                  name="turma"
-                  value={editando ? dadosEditados.turma : aluno.turma}
-                  onChange={handleInputChange}
-                  disabled={true}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="dataNascimento">Data de Nascimento</Label>
-                <Input
-                  id="dataNascimento"
-                  name="dataNascimento"
-                  value={editando ? dadosEditados.dataNascimento : aluno.dataNascimento}
-                  onChange={handleInputChange}
-                  disabled={!editando}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="telefone">Telefone</Label>
-                <Input
-                  id="telefone"
-                  name="telefone"
-                  value={editando ? dadosEditados.telefone : aluno.telefone}
-                  onChange={handleInputChange}
-                  disabled={!editando}
-                />
-              </div>
-
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="endereco">Endereço</Label>
-                <Input
-                  id="endereco"
-                  name="endereco"
-                  value={editando ? dadosEditados.endereco : aluno.endereco}
-                  onChange={handleInputChange}
-                  disabled={!editando}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="responsavel">Responsável</Label>
-                <Input
-                  id="responsavel"
-                  name="responsavel"
-                  value={editando ? dadosEditados.responsavel : aluno.responsavel}
-                  onChange={handleInputChange}
-                  disabled={true}
-                />
-              </div>
-            </div>
-
-            {/* Botões de Ação */}
-            <div className="flex justify-end gap-4">
-              {editando ? (
-                <>
-                  <Button variant="outline" onClick={handleCancelar}>
-                    <X className="h-4 w-4 mr-2" />
-                    Cancelar
-                  </Button>
-                  <Button onClick={handleSalvar}>
-                    <Save className="h-4 w-4 mr-2" />
-                    Salvar Alterações
-                  </Button>
-                </>
-              ) : (
-                <Button onClick={() => setEditando(true)}>
-                  Editar Perfil
-                </Button>
-              )}
-            </div>
-          </div>
-        </Card>
+        <div className="flex justify-end gap-4">
+          <Button
+            variant="outline"
+            onClick={() => navigate(`/historico-aluno/${aluno.id}`)}
+          >
+            <BookOpen className="h-4 w-4 mr-2" />
+            Ver Histórico
+          </Button>
+          <Button
+            onClick={() => navigate(`/editar-perfil-aluno/${aluno.id}`)}
+          >
+            Editar Perfil
+          </Button>
+        </div>
       </div>
     </div>
   );

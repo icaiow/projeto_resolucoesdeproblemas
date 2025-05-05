@@ -244,7 +244,7 @@ const GerenciarDenuncias = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => navigate(`/atividades/denuncia/${denuncia.id}`)}
+                        onClick={() => navigate(`/denuncia/${denuncia.id}`)}
                       >
                         Ver Detalhes
                       </Button>

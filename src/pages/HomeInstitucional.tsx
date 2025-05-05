@@ -146,7 +146,7 @@ const HomeInstitucional = () => {
             </div>
             <div className="mt-auto">
               <Button 
-                onClick={() => navigate("/denuncias")}
+                onClick={() => navigate("/gerenciar-denuncias")}
                 className="w-full bg-red-600 hover:bg-red-700 text-white"
               >
                 Ver Denúncias

@@ -46,6 +46,7 @@ import Comunicacao from "./pages/Comunicacao";
 import Materiais from "./pages/Materiais";
 import Notificacoes from "./pages/Notificacoes";
 import Documentos from "./pages/Documentos";
+import HistoricoAluno from "./pages/HistoricoAluno";
 
 const queryClient = new QueryClient();
 
@@ -70,6 +71,7 @@ const App = () => (
             <Route path="/informar-prevenir" element={<InformarPrevenir />} />
             <Route path="/gestao-institucional" element={<GestaoInstitucional />} />
             <Route path="/denuncia" element={<Denuncia />} />
+            <Route path="/denuncia/:id" element={<Denuncia />} />
             <Route path="/historico-denuncias" element={<HistoricoDenuncias />} />
             <Route path="/comunicacao" element={<Comunicacao />} />
             <Route path="/materiais" element={<Materiais />} />
@@ -95,9 +97,11 @@ const App = () => (
             <Route path="/configuracoes" element={<Configuracoes />} />
             <Route path="/gestao-alunos" element={<GestaoAlunos />} />
             <Route path="/perfil-aluno" element={<PerfilAluno />} />
+            <Route path="/perfil-aluno/:id" element={<PerfilAluno />} />
             <Route path="/responsaveis-aluno" element={<ResponsaveisAluno />} />
             <Route path="/escuta-aluno" element={<EscutaAluno />} />
             <Route path="/eventos-campanhas" element={<EventosCampanhas />} />
+            <Route path="/historico-aluno/:id" element={<HistoricoAluno />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

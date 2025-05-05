@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Search, User, Users, GraduationCap, AlertCircle, CheckCircle2, MessageSquare, AlertTriangle, Clock, ArrowUp } from "lucide-react";
+import { ArrowLeft, Search, User, Users, GraduationCap, AlertCircle, CheckCircle2, MessageSquare, AlertTriangle, Clock, ArrowUp, BookOpen, MessageCircle } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -21,6 +21,7 @@ interface Aluno {
   ultimoAcesso: string;
   escutas: number;
   denuncias: number;
+  responsavel: string;
 }
 
 const GestaoAlunos = () => {
@@ -39,7 +40,8 @@ const GestaoAlunos = () => {
       status: "ativo",
       ultimoAcesso: "15/03/2024",
       escutas: 2,
-      denuncias: 1
+      denuncias: 1,
+      responsavel: "Maria Silva"
     },
     {
       id: "2",
@@ -49,7 +51,8 @@ const GestaoAlunos = () => {
       status: "ativo",
       ultimoAcesso: "14/03/2024",
       escutas: 1,
-      denuncias: 0
+      denuncias: 0,
+      responsavel: "José Santos"
     },
     {
       id: "3",
@@ -59,7 +62,8 @@ const GestaoAlunos = () => {
       status: "transferido",
       ultimoAcesso: "10/03/2024",
       escutas: 0,
-      denuncias: 0
+      denuncias: 0,
+      responsavel: "Ana Oliveira"
     }
   ];
 
@@ -91,7 +95,8 @@ const GestaoAlunos = () => {
 
   const filteredAlunos = alunos.filter(aluno => {
     const matchesSearch = aluno.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         aluno.matricula.includes(searchTerm);
+                         aluno.matricula.includes(searchTerm) ||
+                         aluno.turma.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === "todos" || aluno.status === filterStatus;
     const matchesTurma = filterTurma === "todos" || aluno.turma === filterTurma;
     return matchesSearch && matchesStatus && matchesTurma;
@@ -169,7 +174,7 @@ const GestaoAlunos = () => {
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
-                    placeholder="Buscar por nome ou matrícula..."
+                    placeholder="Buscar por nome, turma ou matrícula..."
                     className="pl-10"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -235,17 +240,19 @@ const GestaoAlunos = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => navigate(`/alunos/${aluno.id}`)}
+                        onClick={() => navigate(`/perfil-aluno/${aluno.id}`)}
                         className="border-purple-600 text-purple-600 hover:bg-purple-50"
                       >
-                        Ver Perfil
+                        <User className="h-4 w-4" />
+                        Perfil
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => navigate(`/alunos/${aluno.id}/historico`)}
+                        onClick={() => navigate(`/historico-aluno/${aluno.id}`)}
                         className="border-purple-600 text-purple-600 hover:bg-purple-50"
                       >
+                        <BookOpen className="h-4 w-4" />
                         Histórico
                       </Button>
                     </div>
