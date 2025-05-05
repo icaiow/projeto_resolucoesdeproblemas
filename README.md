@@ -1,73 +1,108 @@
-# Welcome to your Lovable project
+# Portal de Gestão Escolar
 
-## Project info
+## 📋 Sobre o Projeto
 
-**URL**: https://lovable.dev/projects/99e1d0ed-9077-4ee2-a0f1-d0bdf07712f7
+O Portal de Gestão Escolar é uma plataforma web desenvolvida para facilitar a comunicação e gestão entre instituições de ensino, alunos e responsáveis. O sistema oferece funcionalidades específicas para cada tipo de usuário, promovendo um ambiente escolar mais seguro e integrado.
 
-## How can I edit this code?
+## 🚀 Funcionalidades
 
-There are several ways of editing your application.
+### 👨‍🏫 Área Institucional
+- Login institucional
+- Gestão de alunos e responsáveis
+- Monitoramento de denúncias
+- Gerenciamento de materiais educativos
+- Relatórios e estatísticas
+- Configurações institucionais
 
-**Use Lovable**
+### 👨‍🎓 Área do Aluno
+- Login do aluno
+- Denúncias anônimas
+- Acesso a materiais educativos
+- Perfil personalizado
+- Atividades recentes
+- Informações sobre bullying
+- Busca de ajuda psicológica
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/99e1d0ed-9077-4ee2-a0f1-d0bdf07712f7) and start prompting.
+### 👨‍👩‍👧‍👦 Área do Responsável
+- Login do responsável
+- Envio de denúncias
+- Histórico de denúncias
+- Comunicação com a escola
+- Acesso a materiais educativos
+- Notificações
+- Documentos importantes
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🛠️ Tecnologias Utilizadas
 
-**Use your preferred IDE**
+- **Frontend:**
+  - React
+  - TypeScript
+  - Tailwind CSS
+  - shadcn/ui
+  - React Router DOM
+  - React Query
+  - Lucide Icons
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 📦 Instalação
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+1. Clone o repositório:
+```bash
+git clone <URL_DO_REPOSITÓRIO>
+```
 
-Follow these steps:
+2. Instale as dependências:
+```bash
+npm install
+```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+3. Inicie o servidor de desenvolvimento:
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## 🎨 Estrutura do Projeto
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```
+src/
+├── components/     # Componentes reutilizáveis
+├── pages/         # Páginas da aplicação
+├── hooks/         # Hooks personalizados
+├── lib/           # Configurações e utilitários
+└── App.tsx        # Componente principal
+```
 
-**Use GitHub Codespaces**
+## 🔐 Rotas Principais
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Rotas Públicas
+- `/` - Página inicial
+- `/login-institucional` - Login para instituições
+- `/login-aluno` - Login para alunos
+- `/login-responsavel` - Login para responsáveis
+- `/cadastro-responsavel` - Cadastro de responsáveis
 
-## What technologies are used for this project?
+### Rotas Protegidas
+- `/home-institucional` - Dashboard institucional
+- `/home-alunos` - Dashboard do aluno
+- `/home-responsaveis` - Dashboard do responsável
+- `/denuncia` - Envio de denúncias
+- `/historico-denuncias` - Histórico de denúncias
+- `/comunicacao` - Comunicação com a escola
+- `/materiais` - Materiais educativos
+- `/notificacoes` - Notificações
+- `/documentos` - Documentos importantes
 
-This project is built with:
+## 🤝 Contribuição
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+1. Faça um Fork do projeto
+2. Crie uma Branch para sua Feature (`git checkout -b feature/AmazingFeature`)
+3. Faça o Commit das suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Faça o Push para a Branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
 
-## How can I deploy this project?
+## 📝 Licença
 
-Simply open [Lovable](https://lovable.dev/projects/99e1d0ed-9077-4ee2-a0f1-d0bdf07712f7) and click on Share -> Publish.
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
-## Can I connect a custom domain to my Lovable project?
+## 📧 Contato
 
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Para mais informações ou suporte, entre em contato através do email: [seu-email@exemplo.com]
