@@ -1,0 +1,112 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  senha     String
+  nome      String
+  tipo      String // "aluno", "responsavel", "admin", "instituicao"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relações
+  aluno       Aluno?
+  responsavel Responsavel?
+  instituicao Instituicao?
+  denuncias   Denuncia[]
+  comentarios Comentario[]
+}
+
+model Aluno {
+  id             Int      @id @default(autoincrement())
+  usuarioId      Int      @unique
+  usuario        Usuario  @relation(fields: [usuarioId], references: [id])
+  matricula      String   @unique
+  turma          String
+  serie          String
+  dataNascimento DateTime
+  instituicaoId  Int?
+
+  // Relações
+  responsaveis ResponsavelAluno[]
+  instituicao  Instituicao?      @relation(fields: [instituicaoId], references: [id])
+}
+
+model Responsavel {
+  id        Int     @id @default(autoincrement())
+  usuarioId Int     @unique
+  usuario   Usuario @relation(fields: [usuarioId], references: [id])
+  cpf       String  @unique
+  telefone  String
+
+  // Relações
+  alunos ResponsavelAluno[]
+}
+
+model ResponsavelAluno {
+  id            Int    @id @default(autoincrement())
+  responsavelId Int
+  alunoId       Int
+  parentesco    String
+
+  // Relações
+  responsavel Responsavel @relation(fields: [responsavelId], references: [id])
+  aluno       Aluno       @relation(fields: [alunoId], references: [id])
+
+  @@unique([responsavelId, alunoId])
+}
+
+model Instituicao {
+  id        Int    @id @default(autoincrement())
+  usuarioId Int    @unique
+  cnpj      String @unique
+  endereco  String
+
+  // Relações
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+  alunos  Aluno[]
+}
+
+model Denuncia {
+  id        Int      @id @default(autoincrement())
+  titulo    String
+  descricao String
+  tipo      String // "bullying", "violencia", "outros"
+  status    String // "pendente", "em_analise", "resolvida"
+  anonima   Boolean  @default(false)
+  usuarioId Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relações
+  usuario     Usuario?     @relation(fields: [usuarioId], references: [id])
+  comentarios Comentario[]
+}
+
+model Comentario {
+  id         Int      @id @default(autoincrement())
+  texto      String
+  denunciaId Int
+  usuarioId  Int?
+  createdAt  DateTime @default(now())
+
+  // Relações
+  denuncia Denuncia @relation(fields: [denunciaId], references: [id])
+  usuario  Usuario? @relation(fields: [usuarioId], references: [id])
+}
+
+model Documento {
+  id        Int      @id @default(autoincrement())
+  titulo    String
+  descricao String
+  url       String
+  tipo      String // "circular", "aviso", "documento"
+  createdAt DateTime @default(now())
+}
