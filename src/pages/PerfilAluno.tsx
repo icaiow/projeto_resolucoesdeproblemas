@@ -2,38 +2,66 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, User, Users, Mail, Phone, MapPin, BookOpen } from "lucide-react";
+import { useState, useEffect } from "react";
+import api from "@/services/api";
+import { toast } from "sonner";
 
 const PerfilAluno = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const [aluno, setAluno] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Dados simulados do aluno
-  const aluno = {
-    id: id,
-    nome: "João Silva",
-    matricula: "2024001",
-    turma: "8º Ano A",
-    dataNascimento: "15/05/2010",
-    endereco: "Rua Exemplo, 123 - Bairro Centro",
-    email: "joao.silva@escola.com",
-    telefone: "(11) 98765-4321",
-    responsaveis: [
-      {
-        id: 1,
-        nome: "Maria Silva",
-        parentesco: "Mãe",
-        email: "maria.silva@email.com",
-        telefone: "(11) 91234-5678"
-      },
-      {
-        id: 2,
-        nome: "José Silva",
-        parentesco: "Pai",
-        email: "jose.silva@email.com",
-        telefone: "(11) 99876-5432"
+  useEffect(() => {
+    const fetchAluno = async () => {
+      try {
+        setIsLoading(true);
+        const response = await api.get(`/alunos/${id}`);
+        setAluno(response.data);
+      } catch (error) {
+        console.error("Erro ao buscar dados do aluno:", error);
+        toast.error("Erro ao carregar dados do aluno");
+        
+        // Dados simulados para fallback
+        setAluno({
+          id: id,
+          nome: "João Silva",
+          matricula: "2024001",
+          turma: "8º Ano A",
+          dataNascimento: "15/05/2010",
+          endereco: "Rua Exemplo, 123 - Bairro Centro",
+          email: "joao.silva@escola.com",
+          telefone: "(11) 98765-4321",
+          responsaveis: [
+            {
+              id: 1,
+              nome: "Maria Silva",
+              parentesco: "Mãe",
+              email: "maria.silva@email.com",
+              telefone: "(11) 91234-5678"
+            },
+            {
+              id: 2,
+              nome: "José Silva",
+              parentesco: "Pai",
+              email: "jose.silva@email.com",
+              telefone: "(11) 99876-5432"
+            }
+          ]
+        });
+      } finally {
+        setIsLoading(false);
       }
-    ]
-  };
+    };
+
+    if (id) {
+      fetchAluno();
+    }
+  }, [id]);
+
+  if (isLoading) {
+    return <div className="flex justify-center items-center h-screen">Carregando...</div>;
+  }
 
   return (
     <div className="container mx-auto p-6">
@@ -179,4 +207,4 @@ const PerfilAluno = () => {
   );
 };
 
-export default PerfilAluno; 
+export default PerfilAluno;

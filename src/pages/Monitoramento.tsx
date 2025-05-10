@@ -4,9 +4,57 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronRight, ArrowLeft } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import api from "@/services/api";
+import { toast } from "sonner";
 
 const Monitoramento = () => {
   const navigate = useNavigate();
+  const [estatisticas, setEstatisticas] = useState(null);
+  const [denuncias, setDenuncias] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDados = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Buscar estatísticas
+        const estatisticasResponse = await api.get('/denuncias/estatisticas');
+        setEstatisticas(estatisticasResponse.data);
+        
+        // Buscar últimas denúncias
+        const denunciasResponse = await api.get('/denuncias/recentes');
+        setDenuncias(denunciasResponse.data);
+      } catch (error) {
+        console.error("Erro ao buscar dados de monitoramento:", error);
+        toast.error("Erro ao carregar dados de monitoramento");
+        
+        // Dados simulados para fallback
+        setEstatisticas({
+          total: 24,
+          resolvidos: 18,
+          emAnalise: 6,
+          escutas: 42,
+          categorias: [
+            { nome: "Bullying", percentual: 42, casos: 10 },
+            { nome: "Discriminação", percentual: 25, casos: 6 },
+            { nome: "Assédio", percentual: 17, casos: 4 },
+            { nome: "Violência", percentual: 8, casos: 2 },
+            { nome: "Outros", percentual: 8, casos: 2 }
+          ]
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDados();
+  }, []);
+
+  if (isLoading) {
+    return <div className="flex justify-center items-center h-screen">Carregando...</div>;
+  }
 
   return (
     <div className="space-y-6">

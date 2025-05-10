@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import api from "@/services/api";
 
 const CadastroResponsavel = () => {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ const CadastroResponsavel = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (formData.senha !== formData.confirmarSenha) {
@@ -35,13 +36,26 @@ const CadastroResponsavel = () => {
       return;
     }
 
-    // Aqui você implementaria a lógica de cadastro real
-    if (Object.values(formData).every((value) => value)) {
-      // Simulando cadastro bem-sucedido
-      toast.success("Cadastro realizado com sucesso!");
+    try {
+      // Enviar dados para a API
+      await api.post('/auth/cadastro-responsavel', {
+        nome: formData.nome,
+        email: formData.email,
+        senha: formData.senha,
+        telefone: formData.telefone,
+        cpf: formData.cpf
+      });
+      
+      toast.success("Cadastro realizado com sucesso! Você já pode fazer login.");
       navigate("/login-responsavel");
-    } else {
-      toast.error("Por favor, preencha todos os campos");
+    } catch (error) {
+      console.error("Erro ao realizar cadastro:", error);
+      
+      if (error.response && error.response.status === 409) {
+        toast.error("Email ou CPF já cadastrado");
+      } else {
+        toast.error("Erro ao realizar cadastro. Tente novamente mais tarde.");
+      }
     }
   };
 
@@ -157,4 +171,4 @@ const CadastroResponsavel = () => {
   );
 };
 
-export default CadastroResponsavel; 
+export default CadastroResponsavel;

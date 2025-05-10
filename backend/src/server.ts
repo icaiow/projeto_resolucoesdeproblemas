@@ -31,7 +31,7 @@ app.use('/api/instituicoes', instituicaoRoutes);
 
 // Rota de teste
 app.get('/', (req, res) => {
-  res.send('!');
+  res.send('api esta funcionando');
 });
 
 // Iniciar o servidor

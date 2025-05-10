@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import api from '../services/api';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -26,25 +27,49 @@ const LoginInstitucional = () => {
   const [validandoCnpj, setValidandoCnpj] = useState(false);
   const [cnpjValido, setCnpjValido] = useState(true);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-
-    // This is a mockup login
-    setTimeout(() => {
-      setIsLoading(false);
-      toast({
-        title: "Login realizado",
-        description: "Bem-vindo ao sistema institucional",
+    
+    console.log('Tentando fazer login com:', { email, senha: password, tipo: 'institucional' });
+    
+    try {
+      console.log('Enviando requisição para:', '/auth/login');
+      const response = await api.post('/auth/login', { 
+        email, 
+        senha: password,
+        tipo: 'institucional'
       });
-      navigate("/home-institucional");
-    }, 1000);
+      
+      console.log('Resposta recebida:', response.data);
+      
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('usuario', JSON.stringify(response.data.usuario));
+      
+      toast({
+        title: "Login realizado com sucesso",
+        description: "Redirecionando para a área institucional",
+      });
+      
+      navigate('/home-institucional');
+    } catch (error) {
+      console.error("Erro detalhado ao fazer login:", error.response || error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao fazer login",
+        description: "Verifique suas credenciais e tente novamente",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   function validarCnpjMock(cnpj: string) {
     setValidandoCnpj(true);
     setTimeout(() => {
-      setCnpjValido(cnpj.length === 14); // mock: 14 dígitos
+      // Remove caracteres não numéricos
+      const cnpjNumerico = cnpj.replace(/\D/g, '');
+      setCnpjValido(cnpjNumerico.length === 14); // mock: 14 dígitos
       setValidandoCnpj(false);
     }, 800);
   }
@@ -167,7 +192,14 @@ const LoginInstitucional = () => {
           <DialogHeader>
             <DialogTitle>Solicitar Acesso Institucional</DialogTitle>
           </DialogHeader>
-          <form className="space-y-4" onSubmit={e => {e.preventDefault(); setShowSolicitarAcesso(false); toast({title: 'Solicitação enviada', description: 'Sua solicitação será analisada e você receberá um e-mail de confirmação.'});}}>
+          <form className="space-y-4" onSubmit={e => {
+            e.preventDefault(); 
+            setShowSolicitarAcesso(false); 
+            toast({
+              title: 'Cadastro realizado com sucesso', 
+              description: 'Você já pode fazer login com suas credenciais.'
+            });
+          }}>
             <div>
               <Label htmlFor="instituicaoNome">Nome da Instituição</Label>
               <Input id="instituicaoNome" type="text" placeholder="Nome completo da instituição" value={instituicaoNome} onChange={e => setInstituicaoNome(e.target.value)} required />

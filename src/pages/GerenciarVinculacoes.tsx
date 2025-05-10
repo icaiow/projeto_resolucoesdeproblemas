@@ -29,11 +29,11 @@ const GerenciarVinculacoes = () => {
   const fetchSolicitacoes = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get('http://localhost:3001/api/vinculacoes');
+      const response = await api.get('/vinculacoes');
       setSolicitacoes(response.data);
     } catch (error) {
       console.error("Erro ao buscar solicitações:", error);
-      toast.error("Erro ao carregar solicitações de vinculação");
+      toast.error("Erro ao carregar solicitações de vinculação. Tente novamente mais tarde.");
     } finally {
       setIsLoading(false);
     }

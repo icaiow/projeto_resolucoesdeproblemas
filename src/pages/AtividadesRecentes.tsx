@@ -2,43 +2,71 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, MessageCircle, Calendar, BookOpen } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import api from "@/services/api";
+import { toast } from "sonner";
 
 const AtividadesRecentes = () => {
-  const atividades = [
-    {
-      id: "2478",
-      tipo: "escuta",
-      titulo: "Escuta Digital #2478",
-      status: "Respondido",
-      descricao: "Sua escuta sobre a aula de matemática foi respondida.",
-      data: "12/04/2023",
-      link: "/atividades/escuta/2478",
-      icone: <MessageCircle className="h-5 w-5" />,
-      cor: "bg-green-bright"
-    },
-    {
-      id: "workshop",
-      tipo: "evento",
-      titulo: "Workshop: Cidadania Digital",
-      status: "Próximo Evento",
-      descricao: "Workshop sobre uso seguro e responsável da internet.",
-      data: "20/04/2023",
-      link: "/atividades/evento/workshop",
-      icone: <Calendar className="h-5 w-5" />,
-      cor: "bg-amber-500"
-    },
-    {
-      id: "cartilha",
-      tipo: "material",
-      titulo: "Nova cartilha disponível",
-      status: "Material",
-      descricao: "Cartilha sobre prevenção ao cyberbullying.",
-      data: "08/04/2023",
-      link: "/atividades/material/cartilha",
-      icone: <BookOpen className="h-5 w-5" />,
-      cor: "bg-blue-500"
-    }
-  ];
+  const [atividades, setAtividades] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAtividades = async () => {
+      try {
+        setIsLoading(true);
+        const response = await api.get('/atividades/recentes');
+        setAtividades(response.data);
+      } catch (error) {
+        console.error("Erro ao buscar atividades:", error);
+        toast.error("Erro ao carregar atividades recentes");
+        
+        // Dados simulados para fallback
+        setAtividades([
+          {
+            id: "2478",
+            tipo: "escuta",
+            titulo: "Escuta Digital #2478",
+            status: "Respondido",
+            descricao: "Sua escuta sobre a aula de matemática foi respondida.",
+            data: "12/04/2023",
+            link: "/atividades/escuta/2478",
+            icone: <MessageCircle className="h-5 w-5" />,
+            cor: "bg-green-bright"
+          },
+          {
+            id: "workshop",
+            tipo: "evento",
+            titulo: "Workshop: Cidadania Digital",
+            status: "Próximo Evento",
+            descricao: "Workshop sobre uso seguro e responsável da internet.",
+            data: "20/04/2023",
+            link: "/atividades/evento/workshop",
+            icone: <Calendar className="h-5 w-5" />,
+            cor: "bg-amber-500"
+          },
+          {
+            id: "cartilha",
+            tipo: "material",
+            titulo: "Nova cartilha disponível",
+            status: "Material",
+            descricao: "Cartilha sobre prevenção ao cyberbullying.",
+            data: "08/04/2023",
+            link: "/atividades/material/cartilha",
+            icone: <BookOpen className="h-5 w-5" />,
+            cor: "bg-blue-500"
+          }
+        ]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAtividades();
+  }, []);
+
+  if (isLoading) {
+    return <div className="flex justify-center items-center h-screen">Carregando...</div>;
+  }
 
   return (
     <div className="max-w-4xl mx-auto py-8">
@@ -89,4 +117,4 @@ const AtividadesRecentes = () => {
   );
 };
 
-export default AtividadesRecentes; 
+export default AtividadesRecentes;
