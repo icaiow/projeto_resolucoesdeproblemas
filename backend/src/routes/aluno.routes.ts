@@ -1,110 +1,95 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { authMiddleware } from '../middlewares/auth.middleware';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 const router = Router();
 const prisma = new PrismaClient();
 
-// Rota para listar todos os alunos
-router.get('/', authMiddleware, async (req, res) => {
+// Rota para cadastro de aluno
+router.post('/cadastro', async (req, res) => {
   try {
-    const alunos = await prisma.aluno.findMany({
-      include: {
-        usuario: {
-          select: {
-            id: true,
-            nome: true,
-            email: true
-          }
-        }
-      }
+    const { 
+      nome, 
+      email, 
+      senha, 
+      matricula,
+      turma,
+      serie,
+      dataNascimento,
+      instituicaoId
+    } = req.body;
+
+    // Verificar se o usuário já existe
+    const usuarioExistente = await prisma.usuario.findUnique({
+      where: { email },
     });
-    
-    res.json(alunos);
-  } catch (error) {
-    console.error('Erro ao buscar alunos:', error);
-    res.status(500).json({ message: 'Erro ao buscar alunos' });
-  }
-});
 
-// Rota para buscar um aluno específico
-router.get('/:id', authMiddleware, async (req, res) => {
-  try {
-    const { id } = req.params;
-    
-    const aluno = await prisma.aluno.findUnique({
-      where: { id: Number(id) },
-      include: {
-        usuario: {
-          select: {
-            id: true,
-            nome: true,
-            email: true
-          }
-        },
-        responsaveis: {
-          include: {
-            responsavel: {
-              include: {
-                usuario: {
-                  select: {
-                    nome: true,
-                    email: true
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    });
-    
-    if (!aluno) {
-      return res.status(404).json({ message: 'Aluno não encontrado' });
-    }
-    
-    res.json(aluno);
-  } catch (error) {
-    console.error('Erro ao buscar aluno:', error);
-    res.status(500).json({ message: 'Erro ao buscar aluno' });
-  }
-});
-
-// Rota para criar um aluno
-router.post('/', authMiddleware, async (req, res) => {
-  try {
-    const { matricula, turma, serie, dataNascimento } = req.body;
-    const usuarioId = req.usuario?.id;
-
-    // Verificar se o ID do usuário está presente
-    if (!usuarioId) {
-      return res.status(401).json({ message: 'Usuário não autenticado ou ID não disponível' });
+    if (usuarioExistente) {
+      return res.status(400).json({ message: 'Email já cadastrado' });
     }
 
-    // Verificar se o usuário já tem um perfil de aluno
+    // Verificar se a matrícula já existe
     const alunoExistente = await prisma.aluno.findUnique({
-      where: { usuarioId },
+      where: { matricula },
     });
 
     if (alunoExistente) {
-      return res.status(400).json({ message: 'Usuário já possui um perfil de aluno' });
+      return res.status(400).json({ message: 'Matrícula já cadastrada' });
     }
 
-    // Criar o aluno
-    const novoAluno = await prisma.aluno.create({
-      data: {
-        usuarioId: usuarioId, // Agora temos certeza que não é undefined
-        matricula,
-        turma,
-        serie,
-        dataNascimento: new Date(dataNascimento),
-      },
+    // Criptografar a senha
+    const salt = await bcrypt.genSalt(10);
+    const senhaHash = await bcrypt.hash(senha, salt);
+
+    // Criar o usuário e o aluno em uma transação
+    const result = await prisma.$transaction(async (tx) => {
+      // Criar o usuário
+      const novoUsuario = await tx.usuario.create({
+        data: {
+          email,
+          senha: senhaHash,
+          nome,
+          tipo: 'aluno',
+        },
+      });
+
+      // Criar o aluno
+      const novoAluno = await tx.aluno.create({
+        data: {
+          usuarioId: novoUsuario.id,
+          matricula,
+          turma,
+          serie,
+          dataNascimento: new Date(dataNascimento),
+          instituicaoId: instituicaoId || null
+        },
+      });
+
+      return { usuario: novoUsuario, aluno: novoAluno };
     });
 
-    res.status(201).json(novoAluno);
+    // Gerar token JWT
+    const token = jwt.sign(
+      { id: result.usuario.id, tipo: result.usuario.tipo },
+      process.env.JWT_SECRET || 'secret',
+      { expiresIn: '1d' }
+    );
+
+    res.status(201).json({
+      message: 'Aluno cadastrado com sucesso',
+      token,
+      usuario: {
+        id: result.usuario.id,
+        email: result.usuario.email,
+        nome: result.usuario.nome,
+        tipo: result.usuario.tipo,
+      },
+      aluno: result.aluno,
+    });
   } catch (error) {
-    console.error('Erro ao criar aluno:', error);
-    res.status(500).json({ message: 'Erro ao criar aluno' });
+    console.error('Erro ao cadastrar aluno:', error);
+    res.status(500).json({ message: 'Erro ao cadastrar aluno' });
   }
 });
 

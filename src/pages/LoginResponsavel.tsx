@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 const LoginResponsavel = () => {
   const [email, setEmail] = useState("");
@@ -13,6 +14,16 @@ const LoginResponsavel = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  
+  // Estados para o cadastro
+  const [showCadastro, setShowCadastro] = useState(false);
+  const [nome, setNome] = useState("");
+  const [emailCadastro, setEmailCadastro] = useState("");
+  const [senha, setSenha] = useState("");
+  const [confirmarSenha, setConfirmarSenha] = useState("");
+  const [telefone, setTelefone] = useState("");
+  const [cpf, setCpf] = useState("");
+  const [codigoAluno, setCodigoAluno] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -40,6 +51,96 @@ const LoginResponsavel = () => {
         variant: "destructive",
         title: "Erro ao fazer login",
         description: "Verifique suas credenciais e tente novamente",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCadastro = async (e) => {
+    e.preventDefault();
+    
+    // Validar senha
+    if (senha !== confirmarSenha) {
+      toast({
+        variant: "destructive",
+        title: "Erro de validação",
+        description: "As senhas não coincidem",
+      });
+      return;
+    }
+    
+    try {
+      setIsLoading(true);
+      
+      // Simplificar os dados ao máximo
+      const dadosCadastro = {
+        nome,
+        email: emailCadastro,
+        senha,
+        tipo: 'responsavel'
+      };
+      
+      // Adicionar campos opcionais apenas se estiverem preenchidos
+      if (telefone && telefone.trim() !== '') {
+        dadosCadastro.telefone = telefone;
+      }
+      
+      if (cpf && cpf.trim() !== '') {
+        dadosCadastro.cpf = cpf;
+      }
+      
+      console.log('Dados de cadastro:', dadosCadastro);
+      
+      // Tentar uma rota mais genérica
+      const response = await api.post('/auth/register', dadosCadastro);
+      
+      console.log('Resposta do servidor:', response.data);
+      
+      toast({
+        title: "Cadastro realizado com sucesso",
+        description: "Você já pode fazer login com suas credenciais",
+      });
+      
+      // Fechar o modal e limpar os campos
+      setShowCadastro(false);
+      setNome('');
+      setEmailCadastro('');
+      setSenha('');
+      setConfirmarSenha('');
+      setTelefone('');
+      setCpf('');
+      setCodigoAluno('');
+      
+    } catch (error) {
+      console.error("Erro ao cadastrar responsável:", error);
+      
+      // Melhorar a mensagem de erro para ser mais específica
+      let mensagemErro = "Ocorreu um erro ao processar sua solicitação. Tente novamente mais tarde.";
+      
+      if (error.response) {
+        console.log('Detalhes do erro:', error.response);
+        
+        // Verificar se há uma mensagem específica do servidor
+        if (error.response.data && error.response.data.message) {
+          mensagemErro = error.response.data.message;
+        } 
+        // Verificar erros comuns
+        else if (error.response.status === 400) {
+          mensagemErro = "Dados inválidos. Verifique as informações e tente novamente.";
+        } else if (error.response.status === 409) {
+          mensagemErro = "Este email já está em uso. Tente outro email.";
+        } else if (error.response.status === 500) {
+          mensagemErro = "Erro no servidor. Tente novamente mais tarde.";
+        }
+      } else if (error.request) {
+        mensagemErro = "Não foi possível conectar ao servidor. Verifique sua conexão.";
+      }
+      
+      toast({
+        variant: "destructive",
+        title: "Erro ao cadastrar",
+        description: mensagemErro,
       });
     } finally {
       setIsLoading(false);
@@ -112,9 +213,9 @@ const LoginResponsavel = () => {
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               Não tem uma conta?{" "}
-              <Link to="/cadastro-responsavel" className="text-blue-500 font-medium hover:underline">
+              <button type="button" className="text-blue-500 font-medium hover:underline" onClick={() => setShowCadastro(true)}>
                 Cadastre-se
-              </Link>
+              </button>
             </p>
           </div>
 
@@ -157,6 +258,50 @@ const LoginResponsavel = () => {
           </ul>
         </div>
       </div>
+
+      <Dialog open={showCadastro} onOpenChange={setShowCadastro}>
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Cadastro de Responsável</DialogTitle>
+          </DialogHeader>
+          <form className="space-y-4" onSubmit={handleCadastro}>
+            <div>
+              <Label htmlFor="nome">Nome Completo</Label>
+              <Input id="nome" type="text" placeholder="Seu nome completo" value={nome} onChange={e => setNome(e.target.value)} required />
+            </div>
+            <div>
+              <Label htmlFor="emailCadastro">Email</Label>
+              <Input id="emailCadastro" type="email" placeholder="seu-email@exemplo.com" value={emailCadastro} onChange={e => setEmailCadastro(e.target.value)} required />
+            </div>
+            <div>
+              <Label htmlFor="telefone">Telefone</Label>
+              <Input id="telefone" type="tel" placeholder="(00) 00000-0000" value={telefone} onChange={e => setTelefone(e.target.value)} required />
+            </div>
+            <div>
+              <Label htmlFor="cpf">CPF</Label>
+              <Input id="cpf" type="text" placeholder="000.000.000-00" value={cpf} onChange={e => setCpf(e.target.value)} required />
+            </div>
+            <div>
+              <Label htmlFor="codigoAluno">Código do Aluno (opcional)</Label>
+              <Input id="codigoAluno" type="text" placeholder="Código do aluno para vinculação" value={codigoAluno} onChange={e => setCodigoAluno(e.target.value)} />
+            </div>
+            <div>
+              <Label htmlFor="senha">Senha</Label>
+              <Input id="senha" type="password" placeholder="Crie uma senha" value={senha} onChange={e => setSenha(e.target.value)} required />
+            </div>
+            <div>
+              <Label htmlFor="confirmarSenha">Confirmar Senha</Label>
+              <Input id="confirmarSenha" type="password" placeholder="Confirme sua senha" value={confirmarSenha} onChange={e => setConfirmarSenha(e.target.value)} required />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setShowCadastro(false)}>Cancelar</Button>
+              <Button type="submit" className="bg-blue-500 hover:bg-blue-600" disabled={isLoading}>
+                {isLoading ? "Processando..." : "Cadastrar"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

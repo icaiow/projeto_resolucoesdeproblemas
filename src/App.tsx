@@ -36,7 +36,6 @@ import GerenciarMateriais from "./pages/GerenciarMateriais";
 import Relatorios from "./pages/Relatorios";
 import Configuracoes from "./pages/Configuracoes";
 import GestaoAlunos from "./pages/GestaoAlunos";
-import CadastroResponsavel from "./pages/CadastroResponsavel";
 import PerfilAluno from "./pages/PerfilAluno";
 import ResponsaveisAluno from "./pages/ResponsaveisAluno";
 import EscutaAluno from "./pages/EscutaAluno";
@@ -61,7 +60,7 @@ const App = () => (
           <Route path="/login-institucional" element={<LoginInstitucional />} />
           <Route path="/login-aluno" element={<LoginAluno />} />
           <Route path="/login-responsavel" element={<LoginResponsavel />} />
-          <Route path="/cadastro-responsavel" element={<CadastroResponsavel />} />
+          {/* Removida a rota para cadastro-responsavel */}
           <Route element={<Layout />}>
             <Route path="/perfil-institucional" element={<PerfilInstitucional />} />
             <Route path="/escuta-digital" element={<EscutaDigital />} />

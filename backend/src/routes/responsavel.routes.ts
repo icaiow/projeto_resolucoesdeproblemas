@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { authMiddleware } from '../middlewares/auth.middleware';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -120,6 +122,81 @@ router.post('/vincular-aluno', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Erro ao vincular aluno:', error);
     res.status(500).json({ message: 'Erro ao vincular aluno' });
+  }
+});
+
+// Rota para cadastrar um novo responsável
+router.post('/', async (req, res) => {
+  try {
+    const { nome, email, senha, cpf, telefone } = req.body;
+
+    // Verificar se o usuário já existe
+    const usuarioExistente = await prisma.usuario.findUnique({
+      where: { email },
+    });
+
+    if (usuarioExistente) {
+      return res.status(400).json({ message: 'Email já cadastrado' });
+    }
+
+    // Verificar se o CPF já existe
+    const responsavelExistente = await prisma.responsavel.findUnique({
+      where: { cpf },
+    });
+
+    if (responsavelExistente) {
+      return res.status(400).json({ message: 'CPF já cadastrado' });
+    }
+
+    // Criptografar a senha
+    const salt = await bcrypt.genSalt(10);
+    const senhaHash = await bcrypt.hash(senha, salt);
+
+    // Criar o usuário e o responsável em uma transação
+    const result = await prisma.$transaction(async (tx) => {
+      // Criar o usuário
+      const novoUsuario = await tx.usuario.create({
+        data: {
+          email,
+          senha: senhaHash,
+          nome,
+          tipo: 'responsavel',
+        },
+      });
+
+      // Criar o responsável
+      const novoResponsavel = await tx.responsavel.create({
+        data: {
+          usuarioId: novoUsuario.id,
+          cpf,
+          telefone,
+        },
+      });
+
+      return { usuario: novoUsuario, responsavel: novoResponsavel };
+    });
+
+    // Gerar token JWT
+    const token = jwt.sign(
+      { id: result.usuario.id, tipo: result.usuario.tipo },
+      process.env.JWT_SECRET || 'secret',
+      { expiresIn: '1d' }
+    );
+
+    res.status(201).json({
+      message: 'Responsável cadastrado com sucesso',
+      token,
+      usuario: {
+        id: result.usuario.id,
+        email: result.usuario.email,
+        nome: result.usuario.nome,
+        tipo: result.usuario.tipo,
+      },
+      responsavel: result.responsavel,
+    });
+  } catch (error) {
+    console.error('Erro ao cadastrar responsável:', error);
+    res.status(500).json({ message: 'Erro ao cadastrar responsável' });
   }
 });
 

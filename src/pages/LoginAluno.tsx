@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 const LoginAluno = () => {
   const [matricula, setMatricula] = useState("");
@@ -13,6 +14,18 @@ const LoginAluno = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  
+  // Estados para o cadastro
+  const [showCadastro, setShowCadastro] = useState(false);
+  const [nome, setNome] = useState("");
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const [confirmarSenha, setConfirmarSenha] = useState("");
+  const [novaMatricula, setNovaMatricula] = useState("");
+  const [turma, setTurma] = useState("");
+  const [serie, setSerie] = useState("");
+  const [dataNascimento, setDataNascimento] = useState("");
+  const [codigoInstituicao, setCodigoInstituicao] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -40,6 +53,65 @@ const LoginAluno = () => {
         variant: "destructive",
         title: "Erro ao fazer login",
         description: "Verifique suas credenciais e tente novamente",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCadastro = async (e) => {
+    e.preventDefault();
+    
+    // Validar senha
+    if (senha !== confirmarSenha) {
+      toast({
+        variant: "destructive",
+        title: "Erro de validação",
+        description: "As senhas não coincidem",
+      });
+      return;
+    }
+    
+    try {
+      setIsLoading(true);
+      
+      // Chamada para a API de cadastro
+      const response = await api.post('/alunos/cadastro', {
+        nome,
+        email,
+        senha,
+        matricula: novaMatricula,
+        turma,
+        serie,
+        dataNascimento,
+        instituicaoId: codigoInstituicao || undefined
+      });
+      
+      toast({
+        title: "Cadastro realizado com sucesso",
+        description: "Você já pode fazer login com suas credenciais",
+      });
+      
+      // Fechar o modal e limpar os campos
+      setShowCadastro(false);
+      setNome('');
+      setEmail('');
+      setSenha('');
+      setConfirmarSenha('');
+      setNovaMatricula('');
+      setTurma('');
+      setSerie('');
+      setDataNascimento('');
+      setCodigoInstituicao('');
+      
+    } catch (error) {
+      console.error("Erro ao cadastrar aluno:", error);
+      const mensagemErro = error.response?.data?.message || "Ocorreu um erro ao processar sua solicitação. Tente novamente mais tarde.";
+      
+      toast({
+        variant: "destructive",
+        title: "Erro ao cadastrar",
+        description: mensagemErro,
       });
     } finally {
       setIsLoading(false);
@@ -109,6 +181,15 @@ const LoginAluno = () => {
             </Button>
           </form>
 
+          <div className="mt-6 text-center">
+            <p className="text-sm text-gray-600">
+              Não tem uma conta?{" "}
+              <button type="button" className="text-green-bright font-medium hover:underline" onClick={() => setShowCadastro(true)}>
+                Cadastre-se
+              </button>
+            </p>
+          </div>
+
           <div className="mt-8">
             <Link
               to="/"
@@ -148,6 +229,60 @@ const LoginAluno = () => {
           </ul>
         </div>
       </div>
+
+      <Dialog open={showCadastro} onOpenChange={setShowCadastro}>
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Cadastro de Aluno</DialogTitle>
+          </DialogHeader>
+          <form className="space-y-4" onSubmit={handleCadastro}>
+            <div>
+              <Label htmlFor="nome">Nome Completo</Label>
+              <Input id="nome" type="text" placeholder="Seu nome completo" value={nome} onChange={e => setNome(e.target.value)} required />
+            </div>
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" placeholder="seu-email@exemplo.com" value={email} onChange={e => setEmail(e.target.value)} required />
+            </div>
+            <div>
+              <Label htmlFor="novaMatricula">Matrícula</Label>
+              <Input id="novaMatricula" type="text" placeholder="Número de matrícula" value={novaMatricula} onChange={e => setNovaMatricula(e.target.value)} required />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="turma">Turma</Label>
+                <Input id="turma" type="text" placeholder="Ex: 301" value={turma} onChange={e => setTurma(e.target.value)} required />
+              </div>
+              <div>
+                <Label htmlFor="serie">Série</Label>
+                <Input id="serie" type="text" placeholder="Ex: 3º Ano" value={serie} onChange={e => setSerie(e.target.value)} required />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="dataNascimento">Data de Nascimento</Label>
+              <Input id="dataNascimento" type="date" value={dataNascimento} onChange={e => setDataNascimento(e.target.value)} required />
+            </div>
+            <div>
+              <Label htmlFor="codigoInstituicao">Código da Instituição (opcional)</Label>
+              <Input id="codigoInstituicao" type="text" placeholder="Código fornecido pela sua escola" value={codigoInstituicao} onChange={e => setCodigoInstituicao(e.target.value)} />
+            </div>
+            <div>
+              <Label htmlFor="senha">Senha</Label>
+              <Input id="senha" type="password" placeholder="Crie uma senha" value={senha} onChange={e => setSenha(e.target.value)} required />
+            </div>
+            <div>
+              <Label htmlFor="confirmarSenha">Confirmar Senha</Label>
+              <Input id="confirmarSenha" type="password" placeholder="Confirme sua senha" value={confirmarSenha} onChange={e => setConfirmarSenha(e.target.value)} required />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setShowCadastro(false)}>Cancelar</Button>
+              <Button type="submit" className="bg-green-bright hover:bg-green-600" disabled={isLoading}>
+                {isLoading ? "Processando..." : "Cadastrar"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
