@@ -13,6 +13,7 @@ model Usuario {
   senha     String
   nome      String
   tipo      String // "aluno", "responsavel", "admin", "instituicao"
+  username  String?  @unique // Nome de usuário para login
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -64,13 +65,18 @@ model ResponsavelAluno {
 }
 
 model Instituicao {
-  id        Int    @id @default(autoincrement())
-  usuarioId Int    @unique
-  cnpj      String @unique
-  endereco  String
+  id              Int      @id @default(autoincrement())
+  usuarioId       Int      @unique
+  usuario         Usuario  @relation(fields: [usuarioId], references: [id])
+  cnpj            String   @unique
+  endereco        String
+  telefone        String?
+  responsavelNome String?
+  responsavelCpf  String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   // Relações
-  usuario Usuario @relation(fields: [usuarioId], references: [id])
   alunos  Aluno[]
 }
 

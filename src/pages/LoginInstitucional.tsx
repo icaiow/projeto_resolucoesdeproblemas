@@ -26,6 +26,9 @@ const LoginInstitucional = () => {
   const [senha, setSenha] = useState("");
   const [validandoCnpj, setValidandoCnpj] = useState(false);
   const [cnpjValido, setCnpjValido] = useState(true);
+  const [cidade, setCidade] = useState("");
+  const [estado, setEstado] = useState("");
+  const [cep, setCep] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -58,6 +61,59 @@ const LoginInstitucional = () => {
         variant: "destructive",
         title: "Erro ao fazer login",
         description: "Verifique suas credenciais e tente novamente",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSolicitarAcesso = async (e) => {
+    e.preventDefault();
+    
+    try {
+      setIsLoading(true);
+      
+      // Chamada para a API de cadastro
+      const response = await api.post('/instituicoes/cadastro', {
+        nome: instituicaoNome,
+        email: emailInst,
+        senha,
+        cnpj,
+        endereco,
+        telefone,
+        responsavelNome: responsavel,
+        responsavelCpf: cpfResponsavel,
+        
+      });
+      
+      toast({
+        title: "Instituição cadastrada com sucesso",
+        description: "Você já pode fazer login com as credenciais fornecidas",
+      });
+      
+      // Fechar o modal e limpar os campos
+      setShowSolicitarAcesso(false);
+      setInstituicaoNome('');
+      setCnpj('');
+      setEmailInst('');
+      setTelefone('');
+      setEndereco('');
+      setResponsavel('');
+      setCpfResponsavel('');
+      setUsuario('');
+      setSenha('');
+      setCidade('');
+      setEstado('');
+      setCep('');
+      
+    } catch (error) {
+      console.error("Erro ao cadastrar instituição:", error);
+      const mensagemErro = error.response?.data?.message || "Ocorreu um erro ao processar sua solicitação. Tente novamente mais tarde.";
+      
+      toast({
+        variant: "destructive",
+        title: "Erro ao cadastrar instituição",
+        description: mensagemErro,
       });
     } finally {
       setIsLoading(false);
@@ -192,14 +248,7 @@ const LoginInstitucional = () => {
           <DialogHeader>
             <DialogTitle>Solicitar Acesso Institucional</DialogTitle>
           </DialogHeader>
-          <form className="space-y-4" onSubmit={e => {
-            e.preventDefault(); 
-            setShowSolicitarAcesso(false); 
-            toast({
-              title: 'Cadastro realizado com sucesso', 
-              description: 'Você já pode fazer login com suas credenciais.'
-            });
-          }}>
+          <form className="space-y-4" onSubmit={handleSolicitarAcesso}>
             <div>
               <Label htmlFor="instituicaoNome">Nome da Instituição</Label>
               <Input id="instituicaoNome" type="text" placeholder="Nome completo da instituição" value={instituicaoNome} onChange={e => setInstituicaoNome(e.target.value)} required />
@@ -220,7 +269,7 @@ const LoginInstitucional = () => {
             </div>
             <div>
               <Label htmlFor="endereco">Endereço</Label>
-              <Input id="endereco" type="text" placeholder="Rua, número, bairro, cidade" value={endereco} onChange={e => setEndereco(e.target.value)} required />
+              <Input id="endereco" type="text" placeholder="Rua, número, bairro" value={endereco} onChange={e => setEndereco(e.target.value)} required />
             </div>
             <div>
               <Label htmlFor="responsavel">Responsável (Gestor)</Label>
@@ -231,16 +280,14 @@ const LoginInstitucional = () => {
               <Input id="cpfResponsavel" type="text" placeholder="Apenas números" value={cpfResponsavel} onChange={e => setCpfResponsavel(e.target.value)} required />
             </div>
             <div>
-              <Label htmlFor="usuario">Usuário para login</Label>
-              <Input id="usuario" type="text" placeholder="Escolha um nome de usuário" value={usuario} onChange={e => setUsuario(e.target.value)} required />
-            </div>
-            <div>
               <Label htmlFor="senha">Senha</Label>
               <Input id="senha" type="password" placeholder="Crie uma senha" value={senha} onChange={e => setSenha(e.target.value)} required />
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setShowSolicitarAcesso(false)}>Cancelar</Button>
-              <Button type="submit" className="bg-purple hover:bg-purple-dark" disabled={validandoCnpj || !cnpjValido}>Solicitar Acesso</Button>
+              <Button type="submit" className="bg-purple hover:bg-purple-dark" disabled={validandoCnpj || !cnpjValido || isLoading}>
+                {isLoading ? "Processando..." : "Solicitar Acesso"}
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>

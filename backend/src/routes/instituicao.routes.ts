@@ -1,9 +1,103 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { authMiddleware } from '../middlewares/auth.middleware';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 const router = Router();
 const prisma = new PrismaClient();
+
+// Rota para cadastro de instituição
+router.post('/cadastro', async (req, res) => {
+  try {
+    const { 
+      nome, 
+      email, 
+      senha, 
+      cnpj, 
+      endereco, 
+      telefone, 
+      cidade, 
+      estado, 
+      cep, 
+      tipo, 
+      responsavelNome,
+      responsavelCpf,  // Adicione esta linha
+      website 
+    } = req.body;
+
+    // Verificar se o usuário já existe
+    const usuarioExistente = await prisma.usuario.findUnique({
+      where: { email },
+    });
+
+    if (usuarioExistente) {
+      return res.status(400).json({ message: 'Email já cadastrado' });
+    }
+
+    // Verificar se o CNPJ já existe
+    const instituicaoExistente = await prisma.instituicao.findFirst({
+      where: { cnpj },
+    });
+
+    if (instituicaoExistente) {
+      return res.status(400).json({ message: 'CNPJ já cadastrado' });
+    }
+
+    // Criptografar a senha
+    const salt = await bcrypt.genSalt(10);
+    const senhaHash = await bcrypt.hash(senha, salt);
+
+    // Criar o usuário e a instituição em uma transação
+    const result = await prisma.$transaction(async (tx) => {
+      // Criar o usuário
+      const novoUsuario = await tx.usuario.create({
+        data: {
+          email,
+          senha: senhaHash,
+          nome,
+          tipo: 'instituicao',
+        },
+      });
+
+      // Criar a instituição
+      const novaInstituicao = await tx.instituicao.create({
+        data: {
+          usuarioId: novoUsuario.id,
+          cnpj,
+          endereco,
+          telefone,
+          responsavelNome,
+          responsavelCpf  // Use a variável diretamente
+        },
+      });
+
+      return { usuario: novoUsuario, instituicao: novaInstituicao };
+    });
+
+    // Gerar token JWT
+    const token = jwt.sign(
+      { id: result.usuario.id, tipo: result.usuario.tipo },
+      process.env.JWT_SECRET || 'secret',
+      { expiresIn: '1d' }
+    );
+
+    res.status(201).json({
+      message: 'Instituição cadastrada com sucesso',
+      token,
+      usuario: {
+        id: result.usuario.id,
+        email: result.usuario.email,
+        nome: result.usuario.nome,
+        tipo: result.usuario.tipo,
+      },
+      instituicao: result.instituicao,
+    });
+  } catch (error) {
+    console.error('Erro ao cadastrar instituição:', error);
+    res.status(500).json({ message: 'Erro ao cadastrar instituição' });
+  }
+});
 
 // Rota para vincular um aluno a uma instituição
 router.post('/vincular-aluno', authMiddleware, async (req, res) => {
