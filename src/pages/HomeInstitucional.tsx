@@ -1,10 +1,35 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, AlertTriangle, BookOpen, Users, BarChart, Settings, Bell, User, LogOut, MessageSquare, FileText, BarChart2, ArrowLeft, ArrowUp, ArrowDown, PieChart, LineChart } from "lucide-react";
+import { MessageCircle, AlertTriangle, BookOpen, Users, BarChart, Settings, Bell, User, LogOut, MessageSquare, BarChart2, ArrowLeft, ArrowUp, ArrowDown, PieChart, LineChart } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import api from "../services/api";
+import { toast } from "sonner";
 
 const HomeInstitucional = () => {
   const navigate = useNavigate();
+  const [perfil, setPerfil] = useState({ nome: "", cnpj: "", ultimoAcesso: "" });
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login-institucional");
+      return;
+    }
+
+    setIsLoading(true);
+    api.get("/instituicoes/perfil")
+      .then(response => {
+        setPerfil(response.data);
+        setIsLoading(false);
+      })
+      .catch(error => {
+        console.error("Erro ao carregar perfil:", error);
+        toast.error("Erro ao carregar dados do perfil. Por favor, tente novamente.");
+        setIsLoading(false);
+      });
+  }, [navigate]);
 
   return (
     <div className="space-y-6">
@@ -15,13 +40,19 @@ const HomeInstitucional = () => {
               <User className="h-10 w-10 text-gray-400" />
             </div>
             <div>
-              <h3 className="font-bold text-lg">Escola Estadual Exemplo</h3>
-              <p className="text-gray-600 text-sm">CNPJ: 12.345.678/0001-90</p>
-              <p className="text-gray-500 text-xs">Último acesso: 15/04/2023</p>
+              {isLoading ? (
+                <p className="text-gray-500">Carregando dados...</p>
+              ) : (
+                <>
+                  <h3 className="font-bold text-lg">{perfil.nome || "Nome não disponível"}</h3>
+                  <p className="text-gray-600 text-sm">CNPJ: {perfil.cnpj || "Não disponível"}</p>
+                  <p className="text-gray-500 text-xs">Último acesso: {perfil.ultimoAcesso || "Não disponível"}</p>
+                </>
+              )}
             </div>
           </div>
           
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col md:ml-auto gap-2">
             <Button 
               variant="outline" 
               className="flex items-center gap-2"
@@ -234,4 +265,4 @@ const HomeInstitucional = () => {
   );
 };
 
-export default HomeInstitucional; 
+export default HomeInstitucional;

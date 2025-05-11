@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { authMiddleware } from '../middlewares/auth.middleware';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -90,6 +91,111 @@ router.post('/cadastro', async (req, res) => {
   } catch (error) {
     console.error('Erro ao cadastrar aluno:', error);
     res.status(500).json({ message: 'Erro ao cadastrar aluno' });
+  }
+});
+
+// Rota para obter o perfil do aluno autenticado
+router.get('/perfil', authMiddleware, async (req, res) => {
+  try {
+    const usuarioId = req.usuario?.id;
+    
+    const aluno = await prisma.aluno.findUnique({
+      where: { usuarioId },
+      include: { 
+        usuario: true,
+        instituicao: {
+          include: {
+            usuario: true
+          }
+        }
+      }
+    });
+
+    if (!aluno) {
+      return res.status(404).json({ message: 'Aluno não encontrado' });
+    }
+
+    res.json({
+      nome: aluno.usuario.nome,
+      email: aluno.usuario.email,
+      matricula: aluno.matricula,
+      turma: aluno.turma,
+      serie: aluno.serie,
+      dataNascimento: aluno.dataNascimento,
+      escola: aluno.instituicao ? aluno.instituicao.usuario.nome : null,
+      ultimoAcesso: aluno.usuario.updatedAt
+    });
+  } catch (error) {
+    console.error('Erro ao buscar perfil do aluno:', error);
+    res.status(500).json({ message: 'Erro ao buscar perfil do aluno' });
+  }
+});
+
+// Rota para atualizar o perfil do aluno autenticado
+router.put('/perfil', authMiddleware, async (req, res) => {
+  try {
+    const { nome, email, turma, serie } = req.body;
+    const usuarioId = req.usuario?.id;
+
+    // Verificar se o aluno existe
+    const aluno = await prisma.aluno.findUnique({
+      where: { usuarioId },
+      include: { usuario: true }
+    });
+
+    if (!aluno) {
+      return res.status(404).json({ message: 'Aluno não encontrado' });
+    }
+
+    // Verificar se o email já existe (caso esteja sendo alterado)
+    if (email !== aluno.usuario.email) {
+      const emailExistente = await prisma.usuario.findFirst({
+        where: { 
+          email,
+          NOT: { id: usuarioId }
+        }
+      });
+
+      if (emailExistente) {
+        return res.status(400).json({ message: 'Email já cadastrado para outro usuário' });
+      }
+    }
+
+    // Atualizar em uma transação para garantir consistência
+    const result = await prisma.$transaction(async (tx) => {
+      // Atualizar nome e email do usuário
+      const usuarioAtualizado = await tx.usuario.update({
+        where: { id: usuarioId },
+        data: { 
+          nome,
+          email
+        }
+      });
+
+      // Atualizar dados do aluno
+      const alunoAtualizado = await tx.aluno.update({
+        where: { id: aluno.id },
+        data: { 
+          turma,
+          serie
+        }
+      });
+
+      return { usuario: usuarioAtualizado, aluno: alunoAtualizado };
+    });
+
+    res.json({
+      nome: result.usuario.nome,
+      email: result.usuario.email,
+      matricula: aluno.matricula,
+      turma: result.aluno.turma,
+      serie: result.aluno.serie,
+      dataNascimento: aluno.dataNascimento,
+      ultimoAcesso: result.usuario.updatedAt
+    });
+  } catch (error) {
+    console.error('Erro ao atualizar perfil do aluno:', error);
+    res.status(500).json({ message: 'Erro ao atualizar perfil do aluno' });
   }
 });
 

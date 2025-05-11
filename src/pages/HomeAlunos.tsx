@@ -2,8 +2,9 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, BookOpen, Bell, User, LogOut, ArrowLeft, Users, MessageCircle, Calendar, FileText } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import api from "../services/api";
 
 /**
  * Componente principal da área do aluno
@@ -13,6 +14,36 @@ import { toast } from "sonner";
  */
 const HomeAlunos = () => {
   const navigate = useNavigate();
+  const [perfil, setPerfil] = useState({ 
+    nome: "", 
+    email: "", 
+    matricula: "", 
+    turma: "", 
+    serie: "", 
+    escola: "",
+    ultimoAcesso: "" 
+  });
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login-alunos");
+      return;
+    }
+
+    setIsLoading(true);
+    api.get("/alunos/perfil")
+      .then(response => {
+        setPerfil(response.data);
+        setIsLoading(false);
+      })
+      .catch(error => {
+        console.error("Erro ao carregar perfil:", error);
+        toast.error("Erro ao carregar dados do perfil. Por favor, tente novamente.");
+        setIsLoading(false);
+      });
+  }, [navigate]);
 
   return (
     <div className="space-y-6">
@@ -23,9 +54,15 @@ const HomeAlunos = () => {
               <User className="h-10 w-10 text-gray-400" />
             </div>
             <div>
-              <h3 className="font-bold text-lg">João da Silva</h3>
-              <p className="text-gray-600 text-sm">Escola Estadual Exemplo</p>
-              <p className="text-gray-500 text-xs">RA: 123456789</p>
+              {isLoading ? (
+                <p className="text-gray-500">Carregando dados...</p>
+              ) : (
+                <>
+                  <h3 className="font-bold text-lg">{perfil.nome || "Nome não disponível"}</h3>
+                  <p className="text-gray-600 text-sm">{perfil.escola || "Escola não vinculada"}</p>
+                  <p className="text-gray-500 text-xs">RA: {perfil.matricula || "Não disponível"}</p>
+                </>
+              )}
             </div>
           </div>
           <div className="flex flex-col md:ml-auto gap-2">

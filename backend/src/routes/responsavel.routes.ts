@@ -29,6 +29,68 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
+// Rota para obter o perfil do responsável autenticado
+router.get('/perfil', authMiddleware, async (req, res) => {
+  try {
+    const usuarioId = req.usuario?.id;
+    console.log('Buscando perfil para usuarioId:', usuarioId);
+    
+    const responsavel = await prisma.responsavel.findUnique({
+      where: { usuarioId },
+      include: { 
+        usuario: true,
+        alunos: {
+          include: {
+            aluno: {
+              include: {
+                usuario: true,
+                instituicao: {
+                  include: {
+                    usuario: true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (!responsavel) {
+      console.log('Responsável não encontrado para usuarioId:', usuarioId);
+      return res.status(404).json({ message: 'Responsável não encontrado' });
+    }
+
+    console.log('Responsável encontrado:', responsavel);
+
+    // Formatar os dados dos alunos vinculados
+    const alunosVinculados = responsavel.alunos.map(vinculo => ({
+      id: vinculo.aluno.id,
+      nome: vinculo.aluno.usuario.nome,
+      matricula: vinculo.aluno.matricula,
+      turma: vinculo.aluno.turma,
+      serie: vinculo.aluno.serie,
+      escola: vinculo.aluno.instituicao ? vinculo.aluno.instituicao.usuario.nome : null,
+      parentesco: vinculo.parentesco
+    }));
+
+    const perfilResponse = {
+      nome: responsavel.usuario.nome,
+      email: responsavel.usuario.email,
+      cpf: responsavel.cpf,
+      telefone: responsavel.telefone,
+      alunos: alunosVinculados,
+      ultimoAcesso: responsavel.usuario.updatedAt
+    };
+
+    console.log('Resposta de perfil:', perfilResponse);
+    res.json(perfilResponse);
+  } catch (error) {
+    console.error('Erro ao buscar perfil do responsável:', error);
+    res.status(500).json({ message: 'Erro ao buscar perfil do responsável' });
+  }
+});
+
 // Rota para buscar um responsável específico
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
@@ -197,6 +259,102 @@ router.post('/', async (req, res) => {
   } catch (error) {
     console.error('Erro ao cadastrar responsável:', error);
     res.status(500).json({ message: 'Erro ao cadastrar responsável' });
+  }
+});
+
+// Rota para atualizar o perfil do responsável autenticado
+router.put('/perfil', authMiddleware, async (req, res) => {
+  try {
+    const { nome, email, telefone } = req.body;
+    const usuarioId = req.usuario?.id;
+
+    // Verificar se o responsável existe
+    const responsavel = await prisma.responsavel.findUnique({
+      where: { usuarioId },
+      include: { usuario: true }
+    });
+
+    if (!responsavel) {
+      return res.status(404).json({ message: 'Responsável não encontrado' });
+    }
+
+    // Verificar se o email já existe (caso esteja sendo alterado)
+    if (email !== responsavel.usuario.email) {
+      const emailExistente = await prisma.usuario.findFirst({
+        where: { 
+          email,
+          NOT: { id: usuarioId }
+        }
+      });
+
+      if (emailExistente) {
+        return res.status(400).json({ message: 'Email já cadastrado para outro usuário' });
+      }
+    }
+
+    // Atualizar em uma transação para garantir consistência
+    const result = await prisma.$transaction(async (tx) => {
+      // Atualizar nome e email do usuário
+      const usuarioAtualizado = await tx.usuario.update({
+        where: { id: usuarioId },
+        data: { 
+          nome,
+          email
+        }
+      });
+
+      // Atualizar telefone do responsável
+      const responsavelAtualizado = await tx.responsavel.update({
+        where: { id: responsavel.id },
+        data: { telefone }
+      });
+
+      return { usuario: usuarioAtualizado, responsavel: responsavelAtualizado };
+    });
+
+    // Buscar os alunos vinculados para incluir na resposta
+    const responsavelComAlunos = await prisma.responsavel.findUnique({
+      where: { id: responsavel.id },
+      include: {
+        alunos: {
+          include: {
+            aluno: {
+              include: {
+                usuario: true,
+                instituicao: {
+                  include: {
+                    usuario: true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Formatar os dados dos alunos vinculados
+    const alunosVinculados = responsavelComAlunos?.alunos.map(vinculo => ({
+      id: vinculo.aluno.id,
+      nome: vinculo.aluno.usuario.nome,
+      matricula: vinculo.aluno.matricula,
+      turma: vinculo.aluno.turma,
+      serie: vinculo.aluno.serie,
+      escola: vinculo.aluno.instituicao ? vinculo.aluno.instituicao.usuario.nome : null,
+      parentesco: vinculo.parentesco
+    })) || [];
+
+    res.json({
+      nome: result.usuario.nome,
+      email: result.usuario.email,
+      cpf: responsavel.cpf,
+      telefone: result.responsavel.telefone,
+      alunos: alunosVinculados,
+      ultimoAcesso: result.usuario.updatedAt
+    });
+  } catch (error) {
+    console.error('Erro ao atualizar perfil do responsável:', error);
+    res.status(500).json({ message: 'Erro ao atualizar perfil do responsável' });
   }
 });
 

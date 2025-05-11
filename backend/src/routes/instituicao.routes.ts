@@ -171,4 +171,86 @@ router.get('/alunos', authMiddleware, async (req, res) => {
   }
 });
 
+// Rota para obter o perfil da instituição autenticada
+router.get('/perfil', authMiddleware, async (req, res) => {
+  try {
+    const usuarioId = req.usuario?.id;
+    const instituicao = await prisma.instituicao.findUnique({
+      where: { usuarioId },
+      include: { usuario: true }
+    });
+
+    if (!instituicao) {
+      return res.status(404).json({ message: 'Instituição não encontrada' });
+    }
+
+    res.json({
+      nome: instituicao.usuario.nome,
+      cnpj: instituicao.cnpj,
+      ultimoAcesso: instituicao.usuario.updatedAt
+    });
+  } catch (error) {
+    console.error('Erro ao buscar perfil da instituição:', error);
+    res.status(500).json({ message: 'Erro ao buscar perfil da instituição' });
+  }
+});
+
+// Rota para atualizar o perfil da instituição autenticada
+router.put('/perfil', authMiddleware, async (req, res) => {
+  try {
+    const { nome, cnpj } = req.body;
+    const usuarioId = req.usuario?.id;
+
+    // Verificar se o usuário é uma instituição
+    const instituicao = await prisma.instituicao.findUnique({
+      where: { usuarioId },
+      include: { usuario: true }
+    });
+
+    if (!instituicao) {
+      return res.status(404).json({ message: 'Instituição não encontrada' });
+    }
+
+    // Verificar se o CNPJ já existe (caso esteja sendo alterado)
+    if (cnpj !== instituicao.cnpj) {
+      const cnpjExistente = await prisma.instituicao.findFirst({
+        where: { 
+          cnpj,
+          NOT: { id: instituicao.id }
+        }
+      });
+
+      if (cnpjExistente) {
+        return res.status(400).json({ message: 'CNPJ já cadastrado para outra instituição' });
+      }
+    }
+
+    // Atualizar em uma transação para garantir consistência
+    const result = await prisma.$transaction(async (tx) => {
+      // Atualizar nome do usuário
+      const usuarioAtualizado = await tx.usuario.update({
+        where: { id: usuarioId },
+        data: { nome }
+      });
+
+      // Atualizar CNPJ da instituição
+      const instituicaoAtualizada = await tx.instituicao.update({
+        where: { id: instituicao.id },
+        data: { cnpj }
+      });
+
+      return { usuario: usuarioAtualizado, instituicao: instituicaoAtualizada };
+    });
+
+    res.json({
+      nome: result.usuario.nome,
+      cnpj: result.instituicao.cnpj,
+      ultimoAcesso: result.usuario.updatedAt
+    });
+  } catch (error) {
+    console.error('Erro ao atualizar perfil da instituição:', error);
+    res.status(500).json({ message: 'Erro ao atualizar perfil da instituição' });
+  }
+});
+
 export default router;

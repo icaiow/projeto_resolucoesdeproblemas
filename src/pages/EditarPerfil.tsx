@@ -1,152 +1,119 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Save } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import api from "../services/api";
+import { useToast } from "@/components/ui/use-toast";
 
 const EditarPerfil = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    nome: "Escola Estadual Exemplo",
-    cnpj: "12.345.678/0001-90",
-    email: "contato@escolaexemplo.com",
-    telefone: "(11) 1234-5678",
-    endereco: "Rua Exemplo, 123",
-    cidade: "São Paulo",
-    estado: "SP"
-  });
+  const { toast } = useToast();
+  const [perfil, setPerfil] = useState({ nome: "", cnpj: "" });
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login-institucional");
+      return;
+    }
 
-  const handleSubmit = (e: React.FormEvent) => {
+    api.get("/instituicoes/perfil")
+      .then(response => {
+        setPerfil(response.data);
+      })
+      .catch(error => {
+        console.error("Erro ao carregar perfil:", error);
+        toast({
+          variant: "destructive",
+          title: "Erro ao carregar perfil",
+          description: "Não foi possível carregar os dados do perfil. Tente novamente mais tarde."
+        });
+      });
+  }, [navigate, toast]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Aqui você implementaria a lógica para salvar as alterações
-    alert("Perfil atualizado com sucesso!");
-    navigate("/home-institucional");
+    setIsLoading(true);
+
+    try {
+      await api.put("/instituicoes/perfil", perfil);
+      toast({
+        title: "Perfil atualizado com sucesso",
+        description: "Os dados da instituição foram atualizados."
+      });
+      navigate("/home-institucional");
+    } catch (error) {
+      console.error("Erro ao atualizar perfil:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao atualizar perfil",
+        description: "Não foi possível atualizar os dados do perfil. Tente novamente mais tarde."
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="space-y-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold mb-2">Editar Perfil</h1>
-            <p className="text-gray-600">
-              Atualize as informações do perfil da instituição.
-            </p>
-          </div>
-          <Button 
-            variant="outline" 
-            onClick={() => navigate("/home-institucional")}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Voltar
-          </Button>
+    <div className="container mx-auto py-6">
+      <div className="flex items-center mb-6">
+        <Button 
+          variant="outline" 
+          onClick={() => navigate("/home-institucional")}
+          className="mr-4"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Voltar
+        </Button>
+        <h1 className="text-2xl font-bold mb-2">Editar Perfil</h1>
+      </div>
+      <p className="text-gray-600 mb-8">
+        Atualize as informações do perfil da instituição.
+      </p>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="col-span-2">
+          <Card className="p-6">
+            <form onSubmit={handleSubmit}>
+              <h2 className="text-2xl font-bold mb-4">Editar Perfil</h2>
+              <div className="grid gap-4 mb-6">
+                <div>
+                  <Label htmlFor="nome">Nome da Instituição</Label>
+                  <Input 
+                    id="nome" 
+                    value={perfil.nome}
+                    onChange={(e) => setPerfil({ ...perfil, nome: e.target.value })}
+                    placeholder="Nome da instituição"
+                    className="mt-1"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="cnpj">CNPJ</Label>
+                  <Input 
+                    id="cnpj" 
+                    value={perfil.cnpj}
+                    onChange={(e) => setPerfil({ ...perfil, cnpj: e.target.value })}
+                    placeholder="00.000.000/0000-00"
+                    className="mt-1"
+                    required
+                  />
+                </div>
+              </div>
+              <Button 
+                type="submit" 
+                className="w-full"
+                disabled={isLoading}
+              >
+                {isLoading ? "Salvando..." : "Salvar Alterações"}
+              </Button>
+            </form>
+          </Card>
         </div>
-
-        <Card className="p-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Nome da Instituição</label>
-                <Input
-                  name="nome"
-                  value={formData.nome}
-                  onChange={handleChange}
-                  placeholder="Nome da instituição"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">CNPJ</label>
-                <Input
-                  name="cnpj"
-                  value={formData.cnpj}
-                  onChange={handleChange}
-                  placeholder="CNPJ"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">E-mail</label>
-                <Input
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="E-mail"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Telefone</label>
-                <Input
-                  name="telefone"
-                  value={formData.telefone}
-                  onChange={handleChange}
-                  placeholder="Telefone"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Endereço</label>
-                <Input
-                  name="endereco"
-                  value={formData.endereco}
-                  onChange={handleChange}
-                  placeholder="Endereço"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Cidade</label>
-                  <Input
-                    name="cidade"
-                    value={formData.cidade}
-                    onChange={handleChange}
-                    placeholder="Cidade"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Estado</label>
-                  <Input
-                    name="estado"
-                    value={formData.estado}
-                    onChange={handleChange}
-                    placeholder="Estado"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate("/home-institucional")}
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="submit"
-                className="bg-purple-600 hover:bg-purple-700 text-white"
-              >
-                <Save className="h-4 w-4 mr-2" />
-                Salvar Alterações
-              </Button>
-            </div>
-          </form>
-        </Card>
       </div>
     </div>
   );

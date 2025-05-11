@@ -1,21 +1,48 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Save } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { ArrowLeft } from "lucide-react";
+import api from "../services/api";
+import { toast } from "sonner";
 
 const EditarPerfilAluno = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    nome: "João da Silva",
-    email: "joao.silva@escola.com",
-    telefone: "(11) 99999-9999",
-    escola: "Escola Estadual Exemplo",
-    RA: "123456789",
-    serie: "8º Ano",
-    turma: "A"
+    nome: "",
+    email: "",
+    matricula: "",
+    serie: "",
+    turma: "",
+    escola: ""
   });
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login-alunos");
+      return;
+    }
+
+    api.get("/alunos/perfil")
+      .then(response => {
+        setFormData({
+          nome: response.data.nome || "",
+          email: response.data.email || "",
+          matricula: response.data.matricula || "",
+          serie: response.data.serie || "",
+          turma: response.data.turma || "",
+          escola: response.data.escola || ""
+        });
+      })
+      .catch(error => {
+        console.error("Erro ao carregar perfil:", error);
+        toast.error("Erro ao carregar dados do perfil. Por favor, tente novamente.");
+      });
+  }, [navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -25,128 +52,139 @@ const EditarPerfilAluno = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Aqui você implementaria a lógica para salvar as alterações
-    alert("Perfil atualizado com sucesso!");
-    navigate("/home-alunos");
+    setIsLoading(true);
+
+    try {
+      await api.put("/alunos/perfil", {
+        nome: formData.nome,
+        email: formData.email,
+        turma: formData.turma,
+        serie: formData.serie
+      });
+      
+      toast.success("Perfil atualizado com sucesso!");
+      navigate("/home-alunos");
+    } catch (error) {
+      console.error("Erro ao atualizar perfil:", error);
+      toast.error("Erro ao atualizar perfil. Por favor, tente novamente.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="space-y-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold mb-2">Editar Perfil</h1>
-            <p className="text-gray-600">
-              Atualize suas informações pessoais.
-            </p>
-          </div>
-          <Button 
-            variant="outline" 
-            onClick={() => navigate("/home-alunos")}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Voltar
-          </Button>
+    <div className="container mx-auto py-6">
+      <div className="flex items-center mb-6">
+        <Button 
+          variant="outline" 
+          onClick={() => navigate("/home-alunos")}
+          className="mr-4"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Voltar
+        </Button>
+        <h1 className="text-2xl font-bold mb-2">Editar Perfil</h1>
+      </div>
+      <p className="text-gray-600 mb-8">
+        Atualize suas informações pessoais.
+      </p>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="col-span-2">
+          <Card className="p-6">
+            <form onSubmit={handleSubmit}>
+              <h2 className="text-2xl font-bold mb-4">Dados Pessoais</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                  <Label htmlFor="nome">Nome Completo</Label>
+                  <Input
+                    id="nome"
+                    name="nome"
+                    value={formData.nome}
+                    onChange={handleChange}
+                    placeholder="Nome completo"
+                    className="mt-1"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="email">E-mail</Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="E-mail"
+                    className="mt-1"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="matricula">Matrícula (RA)</Label>
+                  <Input
+                    id="matricula"
+                    name="matricula"
+                    value={formData.matricula}
+                    placeholder="Matrícula"
+                    className="mt-1"
+                    disabled
+                  />
+                  <p className="text-xs text-gray-500 mt-1">A matrícula não pode ser alterada</p>
+                </div>
+
+                <div>
+                  <Label htmlFor="escola">Escola</Label>
+                  <Input
+                    id="escola"
+                    name="escola"
+                    value={formData.escola}
+                    placeholder="Escola"
+                    className="mt-1"
+                    disabled
+                  />
+                  <p className="text-xs text-gray-500 mt-1">A escola é vinculada pela instituição</p>
+                </div>
+
+                <div>
+                  <Label htmlFor="serie">Série</Label>
+                  <Input
+                    id="serie"
+                    name="serie"
+                    value={formData.serie}
+                    onChange={handleChange}
+                    placeholder="Série"
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="turma">Turma</Label>
+                  <Input
+                    id="turma"
+                    name="turma"
+                    value={formData.turma}
+                    onChange={handleChange}
+                    placeholder="Turma"
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+
+              <Button 
+                type="submit" 
+                className="w-full"
+                disabled={isLoading}
+              >
+                {isLoading ? "Salvando..." : "Salvar Alterações"}
+              </Button>
+            </form>
+          </Card>
         </div>
-
-        <Card className="p-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Nome Completo</label>
-                <Input
-                  name="nome"
-                  value={formData.nome}
-                  onChange={handleChange}
-                  placeholder="Nome completo"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">E-mail</label>
-                <Input
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="E-mail"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Telefone</label>
-                <Input
-                  name="telefone"
-                  value={formData.telefone}
-                  onChange={handleChange}
-                  placeholder="Telefone"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Escola</label>
-                <Input
-                  name="escola"
-                  value={formData.escola}
-                  onChange={handleChange}
-                  placeholder="Escola"
-                  disabled
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">RA</label>
-                <Input
-                  name="RA"
-                  value={formData.RA}
-                  onChange={handleChange}
-                  placeholder="RA"
-                  disabled
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Série</label>
-                <Input
-                  name="serie"
-                  value={formData.serie}
-                  onChange={handleChange}
-                  placeholder="Série"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Turma</label>
-                <Input
-                  name="turma"
-                  value={formData.turma}
-                  onChange={handleChange}
-                  placeholder="Turma"
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate("/home-alunos")}
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="submit"
-                className="bg-purple-600 hover:bg-purple-700 text-white"
-              >
-                <Save className="h-4 w-4 mr-2" />
-                Salvar Alterações
-              </Button>
-            </div>
-          </form>
-        </Card>
       </div>
     </div>
   );
