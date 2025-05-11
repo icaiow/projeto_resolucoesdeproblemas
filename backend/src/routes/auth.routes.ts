@@ -198,16 +198,32 @@ router.post('/register', async (req, res) => {
 
 // Rota de login
 router.post('/login', async (req, res) => {
-try {
-    const { email, senha } = req.body;
+  try {
+    const { email, matricula, senha } = req.body;
 
-    // Verificar se o usuário existe
-    const usuario = await prisma.usuario.findUnique({
-      where: { email },
-    });
+    let usuario;
 
-    if (!usuario) {
-      return res.status(400).json({ message: 'Credenciais inválidas' });
+    if (matricula) {
+      // Buscar o aluno pela matrícula
+      const aluno = await prisma.aluno.findUnique({
+        where: { matricula },
+        include: { usuario: true },
+      });
+
+      if (!aluno) {
+        return res.status(400).json({ message: 'Credenciais inválidas' });
+      }
+
+      usuario = aluno.usuario;
+    } else {
+      // Buscar o usuário pelo email
+      usuario = await prisma.usuario.findUnique({
+        where: { email },
+      });
+
+      if (!usuario) {
+        return res.status(400).json({ message: 'Credenciais inválidas' });
+      }
     }
 
     // Verificar a senha
