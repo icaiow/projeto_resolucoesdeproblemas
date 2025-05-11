@@ -105,12 +105,12 @@ projeto/
 
 1. Clone o repositório:
    ```bash
-   git clone https://github.com/seu-usuario/ambiente-escolar-seguro.git
+   git clone https://github.com/icaiow/projeto_resolucoesdeproblemas.git
    ```
 
 2. Instale as dependências do frontend:
    ```bash
-   cd ambiente-escolar-seguro
+   cd projeto_resolucoesdeproblemas
    npm install
    ```
 
@@ -138,8 +138,8 @@ projeto/
 
 ```env
 # Frontend
-VITE_API_URL=http://localhost:3000
-VITE_APP_NAME=Ambiente Escolar Seguro
+VITE_API_URL=http://localhost:8080
+VITE_APP_NAME=NoHate
 
 # Backend
 DATABASE_URL="postgresql://user:password@localhost:5432/db_name"
