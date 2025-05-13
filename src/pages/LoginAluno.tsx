@@ -22,8 +22,7 @@ const LoginAluno = () => {
   const [senha, setSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
   const [novaMatricula, setNovaMatricula] = useState("");
-  const [turma, setTurma] = useState("");
-  const [serie, setSerie] = useState("");
+  const [turmaId, setTurmaId] = useState("");
   const [dataNascimento, setDataNascimento] = useState("");
   const [codigoInstituicao, setCodigoInstituicao] = useState("");
 
@@ -71,21 +70,27 @@ const LoginAluno = () => {
       });
       return;
     }
+
+    // Log dos dados que serão enviados
+    const dadosCadastro = {
+      nome,
+      email,
+      senha,
+      tipo: 'aluno',
+      matricula: novaMatricula,
+      turmaId,
+      dataNascimento,
+      instituicaoId: codigoInstituicao || undefined
+    };
+    console.log('Dados que serão enviados:', dadosCadastro);
     
     try {
       setIsLoading(true);
       
       // Chamada para a API de cadastro
-      const response = await api.post('/alunos/cadastro', {
-        nome,
-        email,
-        senha,
-        matricula: novaMatricula,
-        turma,
-        serie,
-        dataNascimento,
-        instituicaoId: codigoInstituicao || undefined
-      });
+      console.log('Iniciando requisição para /auth/register');
+      const response = await api.post('/auth/register', dadosCadastro);
+      console.log('Resposta do servidor:', response.data);
       
       toast({
         title: "Cadastro realizado com sucesso",
@@ -99,14 +104,32 @@ const LoginAluno = () => {
       setSenha('');
       setConfirmarSenha('');
       setNovaMatricula('');
-      setTurma('');
-      setSerie('');
+      setTurmaId('');
       setDataNascimento('');
       setCodigoInstituicao('');
       
     } catch (error) {
-      console.error("Erro ao cadastrar aluno:", error);
-      const mensagemErro = error.response?.data?.message || "Ocorreu um erro ao processar sua solicitação. Tente novamente mais tarde.";
+      console.error("Erro detalhado ao cadastrar aluno:", {
+        mensagem: error.message,
+        status: error.response?.status,
+        dados: error.response?.data,
+        config: {
+          url: error.config?.url,
+          method: error.config?.method,
+          baseURL: error.config?.baseURL,
+          headers: error.config?.headers
+        }
+      });
+
+      let mensagemErro = "Ocorreu um erro ao processar sua solicitação. Tente novamente mais tarde.";
+      
+      if (error.response) {
+        // O servidor respondeu com um status de erro
+        mensagemErro = error.response.data?.message || `Erro ${error.response.status}: ${error.response.statusText}`;
+      } else if (error.request) {
+        // A requisição foi feita mas não houve resposta
+        mensagemErro = "Não foi possível conectar ao servidor. Verifique sua conexão.";
+      }
       
       toast({
         variant: "destructive",
@@ -248,15 +271,9 @@ const LoginAluno = () => {
               <Label htmlFor="novaMatricula">Matrícula</Label>
               <Input id="novaMatricula" type="text" placeholder="Número de matrícula" value={novaMatricula} onChange={e => setNovaMatricula(e.target.value)} required />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="turma">Turma</Label>
-                <Input id="turma" type="text" placeholder="Ex: 301" value={turma} onChange={e => setTurma(e.target.value)} required />
-              </div>
-              <div>
-                <Label htmlFor="serie">Série</Label>
-                <Input id="serie" type="text" placeholder="Ex: 3º Ano" value={serie} onChange={e => setSerie(e.target.value)} required />
-              </div>
+            <div>
+              <Label htmlFor="turmaId">Turma</Label>
+              <Input id="turmaId" type="text" placeholder="Ex: 1A" value={turmaId} onChange={e => setTurmaId(e.target.value)} required />
             </div>
             <div>
               <Label htmlFor="dataNascimento">Data de Nascimento</Label>

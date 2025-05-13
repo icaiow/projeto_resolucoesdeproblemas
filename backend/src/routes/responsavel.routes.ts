@@ -68,8 +68,7 @@ router.get('/perfil', authMiddleware, async (req, res) => {
       id: vinculo.aluno.id,
       nome: vinculo.aluno.usuario.nome,
       matricula: vinculo.aluno.matricula,
-      turma: vinculo.aluno.turma,
-      serie: vinculo.aluno.serie,
+      turmaId: vinculo.aluno.turmaId,
       escola: vinculo.aluno.instituicao ? vinculo.aluno.instituicao.usuario.nome : null,
       parentesco: vinculo.parentesco
     }));
@@ -133,7 +132,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
   }
 });
 
-// Rota para vincular um aluno a um responsável
+// Rota para vincular aluno e responsável
 router.post('/vincular-aluno', authMiddleware, async (req, res) => {
   try {
     const { alunoId, parentesco } = req.body;
@@ -150,7 +149,10 @@ router.post('/vincular-aluno', authMiddleware, async (req, res) => {
 
     // Verificar se o aluno existe
     const aluno = await prisma.aluno.findUnique({
-      where: { id: alunoId },
+      where: { id: Number(alunoId) },
+      include: {
+        usuario: true
+      }
     });
 
     if (!aluno) {
@@ -158,13 +160,11 @@ router.post('/vincular-aluno', authMiddleware, async (req, res) => {
     }
 
     // Verificar se já existe uma vinculação
-    const vinculoExistente = await prisma.responsavelAluno.findUnique({
+    const vinculoExistente = await prisma.responsavelAluno.findFirst({
       where: {
-        responsavelId_alunoId: {
-          responsavelId: responsavel.id,
-          alunoId,
-        },
-      },
+        responsavelId: responsavel.id,
+        alunoId: Number(alunoId)
+      }
     });
 
     if (vinculoExistente) {
@@ -175,12 +175,41 @@ router.post('/vincular-aluno', authMiddleware, async (req, res) => {
     const vinculo = await prisma.responsavelAluno.create({
       data: {
         responsavelId: responsavel.id,
-        alunoId,
-        parentesco,
+        alunoId: Number(alunoId),
+        parentesco
       },
+      include: {
+        aluno: {
+          include: {
+            usuario: true
+          }
+        },
+        responsavel: {
+          include: {
+            usuario: true
+          }
+        }
+      }
     });
 
-    res.status(201).json(vinculo);
+    res.status(201).json({
+      message: 'Aluno vinculado com sucesso',
+      vinculo: {
+        id: vinculo.id,
+        aluno: {
+          id: vinculo.aluno.id,
+          nome: vinculo.aluno.usuario.nome,
+          matricula: vinculo.aluno.matricula,
+          turmaId: vinculo.aluno.turmaId
+        },
+        responsavel: {
+          id: vinculo.responsavel.id,
+          nome: vinculo.responsavel.usuario.nome,
+          email: vinculo.responsavel.usuario.email
+        },
+        parentesco: vinculo.parentesco
+      }
+    });
   } catch (error) {
     console.error('Erro ao vincular aluno:', error);
     res.status(500).json({ message: 'Erro ao vincular aluno' });
@@ -338,8 +367,7 @@ router.put('/perfil', authMiddleware, async (req, res) => {
       id: vinculo.aluno.id,
       nome: vinculo.aluno.usuario.nome,
       matricula: vinculo.aluno.matricula,
-      turma: vinculo.aluno.turma,
-      serie: vinculo.aluno.serie,
+      turmaId: vinculo.aluno.turmaId,
       escola: vinculo.aluno.instituicao ? vinculo.aluno.instituicao.usuario.nome : null,
       parentesco: vinculo.parentesco
     })) || [];

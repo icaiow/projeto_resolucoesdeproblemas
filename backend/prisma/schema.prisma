@@ -30,8 +30,7 @@ model Aluno {
   usuarioId      Int      @unique
   usuario        Usuario  @relation(fields: [usuarioId], references: [id])
   matricula      String   @unique
-  turma          String
-  serie          String
+  turmaId        String
   dataNascimento DateTime
   instituicaoId  Int?
 

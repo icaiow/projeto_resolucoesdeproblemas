@@ -15,8 +15,7 @@ router.post('/cadastro', async (req, res) => {
       email, 
       senha, 
       matricula,
-      turma,
-      serie,
+      turmaId,
       dataNascimento,
       instituicaoId
     } = req.body;
@@ -60,8 +59,7 @@ router.post('/cadastro', async (req, res) => {
         data: {
           usuarioId: novoUsuario.id,
           matricula,
-          turma,
-          serie,
+          turmaId,
           dataNascimento: new Date(dataNascimento),
           instituicaoId: instituicaoId || null
         },
@@ -119,8 +117,7 @@ router.get('/perfil', authMiddleware, async (req, res) => {
       nome: aluno.usuario.nome,
       email: aluno.usuario.email,
       matricula: aluno.matricula,
-      turma: aluno.turma,
-      serie: aluno.serie,
+      turmaId: aluno.turmaId,
       dataNascimento: aluno.dataNascimento,
       escola: aluno.instituicao ? aluno.instituicao.usuario.nome : null,
       ultimoAcesso: aluno.usuario.updatedAt
@@ -134,7 +131,7 @@ router.get('/perfil', authMiddleware, async (req, res) => {
 // Rota para atualizar o perfil do aluno autenticado
 router.put('/perfil', authMiddleware, async (req, res) => {
   try {
-    const { nome, email, turma, serie } = req.body;
+    const { nome, email, turmaId } = req.body;
     const usuarioId = req.usuario?.id;
 
     // Verificar se o aluno existe
@@ -176,8 +173,7 @@ router.put('/perfil', authMiddleware, async (req, res) => {
       const alunoAtualizado = await tx.aluno.update({
         where: { id: aluno.id },
         data: { 
-          turma,
-          serie
+          turmaId
         }
       });
 
@@ -188,8 +184,7 @@ router.put('/perfil', authMiddleware, async (req, res) => {
       nome: result.usuario.nome,
       email: result.usuario.email,
       matricula: aluno.matricula,
-      turma: result.aluno.turma,
-      serie: result.aluno.serie,
+      turmaId: result.aluno.turmaId,
       dataNascimento: aluno.dataNascimento,
       ultimoAcesso: result.usuario.updatedAt
     });

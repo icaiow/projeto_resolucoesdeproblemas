@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Search, User, Users, GraduationCap, AlertCircle, CheckCircle2, MessageSquare, AlertTriangle, Clock, ArrowUp, BookOpen, MessageCircle } from "lucide-react";
+import { toast } from "sonner";
+import api from "@/services/api";
 import {
   Select,
   SelectContent,
@@ -22,6 +24,14 @@ interface Aluno {
   escutas: number;
   denuncias: number;
   responsavel: string;
+  idResponsavel?: string;
+}
+
+interface Responsavel {
+  id: string;
+  nome: string;
+  email?: string;
+  telefone?: string;
 }
 
 const GestaoAlunos = () => {
@@ -29,43 +39,182 @@ const GestaoAlunos = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("todos");
   const [filterTurma, setFilterTurma] = useState<string>("todos");
+  const [selectedAluno, setSelectedAluno] = useState<Aluno | null>(null);
+  const [selectedResponsavel, setSelectedResponsavel] = useState<Responsavel | null>(null);
+  const [showVincularModal, setShowVincularModal] = useState(false);
+  const [alunosData, setAlunosData] = useState<Aluno[]>([]);
+  const [responsaveisData, setResponsaveisData] = useState<Responsavel[]>([]);
+  const [isLoadingAlunos, setIsLoadingAlunos] = useState(true);
+  const [isLoadingResponsaveis, setIsLoadingResponsaveis] = useState(true);
+  const [isVinculando, setIsVinculando] = useState(false);
+  const [parentesco, setParentesco] = useState<string>("");
 
-  // Dados mockados para exemplo
-  const alunos: Aluno[] = [
-    {
-      id: "1",
-      nome: "João Silva",
-      turma: "8º A",
-      matricula: "2024001",
-      status: "ativo",
-      ultimoAcesso: "15/03/2024",
-      escutas: 2,
-      denuncias: 1,
-      responsavel: "Maria Silva"
-    },
-    {
-      id: "2",
-      nome: "Maria Santos",
-      turma: "9º B",
-      matricula: "2024002",
-      status: "ativo",
-      ultimoAcesso: "14/03/2024",
-      escutas: 1,
-      denuncias: 0,
-      responsavel: "José Santos"
-    },
-    {
-      id: "3",
-      nome: "Pedro Oliveira",
-      turma: "7º C",
-      matricula: "2024003",
-      status: "transferido",
-      ultimoAcesso: "10/03/2024",
-      escutas: 0,
-      denuncias: 0,
-      responsavel: "Ana Oliveira"
+  useEffect(() => {
+    // Buscar dados de alunos e responsáveis do banco de dados
+    console.log("Iniciando busca inicial de dados...");
+    fetchAlunos();
+    fetchResponsaveis();
+
+    // Atualizar dados a cada 30 segundos
+    const interval = setInterval(() => {
+      console.log("Atualizando dados periodicamente...");
+      fetchAlunos();
+      fetchResponsaveis();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Monitorar mudanças nos dados para depuração
+  useEffect(() => {
+    console.log("Estado atual de alunosData:", {
+      total: alunosData.length,
+      dados: alunosData,
+      loading: isLoadingAlunos
+    });
+  }, [alunosData, isLoadingAlunos]);
+
+  useEffect(() => {
+    console.log("Estado atual de responsaveisData:", {
+      total: responsaveisData.length,
+      dados: responsaveisData,
+      loading: isLoadingResponsaveis
+    });
+  }, [responsaveisData, isLoadingResponsaveis]);
+
+  useEffect(() => {
+    console.log("Estado atual dos selects:", {
+      selectedAluno,
+      selectedResponsavel,
+      parentesco
+    });
+  }, [selectedAluno, selectedResponsavel, parentesco]);
+
+  const fetchAlunos = async () => {
+    try {
+      setIsLoadingAlunos(true);
+      console.log("Iniciando busca de alunos...");
+      
+      const response = await api.get('/auth/usuarios', {
+        params: { tipo: 'ALUNO' }
+      });
+      
+      console.log("Resposta completa da API para alunos:", {
+        status: response.status,
+        headers: response.headers,
+        data: response.data
+      });
+      
+      if (response.data && Array.isArray(response.data)) {
+        console.log("Dados brutos recebidos da API para alunos:", response.data);
+        
+        if (response.data.length === 0) {
+          console.log("API retornou array vazio para alunos");
+          toast.warning("Nenhum aluno encontrado na base de dados");
+          setAlunosData([]);
+          return;
+        }
+        
+        const alunosMapeados = response.data.map((aluno: any) => {
+          console.log("Processando aluno:", aluno);
+          const alunoMapeado = {
+            id: aluno.id,
+            nome: aluno.nome || 'Nome não disponível',
+            turma: aluno.turma || 'Turma não definida',
+            matricula: aluno.matricula || 'Matrícula não disponível',
+            status: aluno.status || 'ativo',
+            ultimoAcesso: aluno.ultimoAcesso || new Date().toISOString(),
+            escutas: aluno.escutas || 0,
+            denuncias: aluno.denuncias || 0,
+            responsavel: aluno.responsavel || 'Não vinculado',
+            idResponsavel: aluno.idResponsavel || null
+          };
+          console.log("Aluno mapeado:", alunoMapeado);
+          return alunoMapeado;
+        });
+        
+        console.log("Total de alunos mapeados:", alunosMapeados.length);
+        setAlunosData(alunosMapeados);
+        toast.success(`${alunosMapeados.length} alunos carregados com sucesso!`);
+      } else {
+        console.warn("Formato de dados inválido recebido da API para alunos:", response.data);
+        toast.error("Formato de dados inválido recebido da API para alunos");
+        setAlunosData([]);
+      }
+    } catch (error: any) {
+      console.error("Erro detalhado ao buscar alunos:", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      toast.error("Erro ao carregar alunos. Por favor, tente novamente.");
+      setAlunosData([]);
+    } finally {
+      setIsLoadingAlunos(false);
     }
-  ];
+  };
+
+  const fetchResponsaveis = async () => {
+    try {
+      setIsLoadingResponsaveis(true);
+      console.log("Iniciando busca de responsáveis...");
+      
+      const response = await api.get('/auth/usuarios', {
+        params: { tipo: 'RESPONSAVEL' }
+      });
+      
+      console.log("Resposta completa da API para responsáveis:", {
+        status: response.status,
+        headers: response.headers,
+        data: response.data
+      });
+      
+      if (response.data && Array.isArray(response.data)) {
+        console.log("Dados brutos recebidos da API para responsáveis:", response.data);
+        
+        if (response.data.length === 0) {
+          console.log("API retornou array vazio para responsáveis");
+          toast.warning("Nenhum responsável encontrado na base de dados");
+          setResponsaveisData([]);
+          return;
+        }
+        
+        const responsaveisMapeados = response.data.map((responsavel: any) => {
+          console.log("Processando responsável:", responsavel);
+          const responsavelMapeado = {
+            id: responsavel.id,
+            nome: responsavel.nome || 'Nome não disponível',
+            email: responsavel.email || 'Email não disponível',
+            telefone: responsavel.telefone || 'Telefone não disponível',
+            cpf: responsavel.cpf || 'CPF não disponível',
+            status: responsavel.status || 'ativo',
+            ultimoAcesso: responsavel.ultimoAcesso || new Date().toISOString(),
+            alunosVinculados: responsavel.alunosVinculados || 0
+          };
+          console.log("Responsável mapeado:", responsavelMapeado);
+          return responsavelMapeado;
+        });
+        
+        console.log("Total de responsáveis mapeados:", responsaveisMapeados.length);
+        setResponsaveisData(responsaveisMapeados);
+        toast.success(`${responsaveisMapeados.length} responsáveis carregados com sucesso!`);
+      } else {
+        console.warn("Formato de dados inválido recebido da API para responsáveis:", response.data);
+        toast.error("Formato de dados inválido recebido da API para responsáveis");
+        setResponsaveisData([]);
+      }
+    } catch (error: any) {
+      console.error("Erro detalhado ao buscar responsáveis:", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      toast.error("Erro ao carregar responsáveis. Por favor, tente novamente.");
+      setResponsaveisData([]);
+    } finally {
+      setIsLoadingResponsaveis(false);
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -93,7 +242,7 @@ const GestaoAlunos = () => {
     }
   };
 
-  const filteredAlunos = alunos.filter(aluno => {
+  const filteredAlunos = alunosData.filter(aluno => {
     const matchesSearch = aluno.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          aluno.matricula.includes(searchTerm) ||
                          aluno.turma.toLowerCase().includes(searchTerm.toLowerCase());
@@ -101,6 +250,59 @@ const GestaoAlunos = () => {
     const matchesTurma = filterTurma === "todos" || aluno.turma === filterTurma;
     return matchesSearch && matchesStatus && matchesTurma;
   });
+
+  const handleVincular = async () => {
+    if (selectedAluno && selectedResponsavel && parentesco) {
+      try {
+        setIsVinculando(true);
+        console.log("Iniciando vinculação entre aluno e responsável...");
+        console.log("Dados para vinculação:", { 
+          alunoId: selectedAluno.id, 
+          parentesco 
+        });
+        
+        // Enviar solicitação para vincular aluno e responsável
+        const response = await api.post('/api/responsaveis/vincular-aluno', {
+          alunoId: selectedAluno.id,
+          parentesco
+        });
+        
+        console.log("Resposta da vinculação:", response.data);
+        
+        // Atualizar o estado local após vinculação bem-sucedida
+        const updatedAlunos = alunosData.map(aluno => 
+          aluno.id === selectedAluno.id 
+            ? { 
+                ...aluno, 
+                responsavel: selectedResponsavel.nome, 
+                idResponsavel: selectedResponsavel.id,
+                parentesco: parentesco 
+              } 
+            : aluno
+        );
+        
+        setAlunosData(updatedAlunos);
+        console.log("Vinculação realizada com sucesso!");
+        toast.success(`Aluno ${selectedAluno.nome} vinculado com sucesso ao responsável ${selectedResponsavel.nome}!`);
+        
+        // Limpar seleções
+        setSelectedAluno(null);
+        setSelectedResponsavel(null);
+        setParentesco("");
+        
+        // Atualizar dados
+        fetchAlunos();
+      } catch (error: any) {
+        console.error("Erro ao vincular aluno e responsável:", error);
+        const errorMessage = error.response?.data?.message || "Não foi possível realizar a vinculação. Tente novamente mais tarde.";
+        toast.error(errorMessage);
+      } finally {
+        setIsVinculando(false);
+      }
+    } else {
+      toast.error("Por favor, selecione um aluno, um responsável e informe o parentesco.");
+    }
+  };
 
   return (
     <div className="container mx-auto p-6">
@@ -121,6 +323,129 @@ const GestaoAlunos = () => {
             Voltar
           </Button>
         </div>
+
+        {/* Seção para Vincular Aluno e Responsável */}
+        <Card className="p-6">
+          <h2 className="text-xl font-semibold mb-4">Vincular Aluno a Responsável</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Aluno</label>
+              <Select
+                value={selectedAluno?.id}
+                onValueChange={(value) => {
+                  console.log("Select de aluno alterado:", value);
+                  const aluno = alunosData.find(a => a.id === value);
+                  console.log("Aluno selecionado:", aluno);
+                  setSelectedAluno(aluno || null);
+                }}
+                disabled={isLoadingAlunos}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={isLoadingAlunos ? "Carregando alunos..." : "Selecione um aluno"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {alunosData.length === 0 ? (
+                    <SelectItem value="none" disabled>
+                      Nenhum aluno disponível
+                    </SelectItem>
+                  ) : (
+                    alunosData.map((aluno) => (
+                      <SelectItem key={aluno.id} value={aluno.id}>
+                        {aluno.nome} - {aluno.turma} ({aluno.matricula})
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-gray-500 mt-1">
+                {isLoadingAlunos 
+                  ? "Carregando alunos..." 
+                  : alunosData.length === 0
+                    ? "Nenhum aluno encontrado"
+                    : `${alunosData.length} aluno${alunosData.length !== 1 ? 's' : ''} disponível${alunosData.length !== 1 ? 'is' : ''}`
+                }
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Responsável</label>
+              <Select
+                value={selectedResponsavel?.id}
+                onValueChange={(value) => {
+                  console.log("Select de responsável alterado:", value);
+                  const responsavel = responsaveisData.find(r => r.id === value);
+                  console.log("Responsável selecionado:", responsavel);
+                  setSelectedResponsavel(responsavel || null);
+                }}
+                disabled={isLoadingResponsaveis}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={isLoadingResponsaveis ? "Carregando responsáveis..." : "Selecione um responsável"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {responsaveisData.length === 0 ? (
+                    <SelectItem value="none" disabled>
+                      Nenhum responsável disponível
+                    </SelectItem>
+                  ) : (
+                    responsaveisData.map((responsavel) => (
+                      <SelectItem key={responsavel.id} value={responsavel.id}>
+                        {responsavel.nome} {responsavel.email ? `(${responsavel.email})` : ''}
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-gray-500 mt-1">
+                {isLoadingResponsaveis 
+                  ? "Carregando responsáveis..." 
+                  : responsaveisData.length === 0
+                    ? "Nenhum responsável encontrado"
+                    : `${responsaveisData.length} responsável${responsaveisData.length !== 1 ? 'is' : ''} disponível${responsaveisData.length !== 1 ? 'is' : ''}`
+                }
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Parentesco</label>
+              <Select
+                value={parentesco}
+                onValueChange={setParentesco}
+                disabled={isVinculando}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o parentesco" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pai">Pai</SelectItem>
+                  <SelectItem value="mae">Mãe</SelectItem>
+                  <SelectItem value="avó">Avó</SelectItem>
+                  <SelectItem value="avô">Avô</SelectItem>
+                  <SelectItem value="tio">Tio</SelectItem>
+                  <SelectItem value="tia">Tia</SelectItem>
+                  <SelectItem value="outro">Outro</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <Button 
+              onClick={handleVincular} 
+              className="w-full md:w-auto bg-purple-600 hover:bg-purple-700"
+              disabled={isLoadingAlunos || isLoadingResponsaveis || isVinculando || !selectedAluno || !selectedResponsavel || !parentesco}
+            >
+              {isLoadingAlunos || isLoadingResponsaveis ? "Carregando dados..." : 
+               isVinculando ? "Vinculando..." : "Vincular"}
+            </Button>
+          </div>
+
+          {selectedAluno && selectedResponsavel && parentesco && (
+            <p className="text-sm text-gray-600 mt-4">
+              Você está prestes a vincular o aluno <strong>{selectedAluno.nome}</strong> ao responsável <strong>{selectedResponsavel.nome}</strong> como <strong>{parentesco}</strong>.
+            </p>
+          )}
+        </Card>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <Card className="p-4">
@@ -267,4 +592,4 @@ const GestaoAlunos = () => {
   );
 };
 
-export default GestaoAlunos; 
+export default GestaoAlunos;
