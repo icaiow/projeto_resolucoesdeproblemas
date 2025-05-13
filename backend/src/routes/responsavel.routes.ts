@@ -135,47 +135,99 @@ router.get('/:id', authMiddleware, async (req, res) => {
 // Rota para vincular aluno e responsável
 router.post('/vincular-aluno', authMiddleware, async (req, res) => {
   try {
-    const { alunoId, parentesco } = req.body;
+    const { alunoId, responsavelId, parentesco } = req.body;
     const usuarioId = req.usuario?.id;
+    const usuarioTipo = req.usuario?.tipo?.toLowerCase();
 
-    // Verificar se o usuário é um responsável
-    const responsavel = await prisma.responsavel.findUnique({
-      where: { usuarioId },
+    console.log('Dados recebidos na vinculação:', {
+      alunoId,
+      responsavelId,
+      parentesco,
+      usuarioId,
+      usuarioTipo
     });
 
-    if (!responsavel) {
-      return res.status(403).json({ message: 'Usuário não é um responsável' });
+    // Verificar se o usuário é um responsável ou uma instituição
+    if (usuarioTipo !== 'responsavel' && usuarioTipo !== 'instituicao') {
+      return res.status(403).json({ 
+        message: 'Apenas responsáveis ou instituições podem fazer vinculações',
+        tipoRecebido: usuarioTipo
+      });
     }
 
-    // Verificar se o aluno existe
-    const aluno = await prisma.aluno.findUnique({
-      where: { id: Number(alunoId) },
+    // Buscar o responsável pelo ID do usuário
+    const responsavel = await prisma.responsavel.findFirst({
+      where: { 
+        usuarioId: Number(responsavelId)
+      },
       include: {
         usuario: true
       }
     });
 
+    if (!responsavel) {
+      console.log('Responsável não encontrado para usuarioId:', responsavelId);
+      return res.status(404).json({ message: 'Responsável não encontrado' });
+    }
+
+    console.log('Responsável encontrado:', responsavel);
+
+    // Buscar o aluno pelo ID do usuário
+    const aluno = await prisma.aluno.findFirst({
+      where: { 
+        usuarioId: Number(alunoId)
+      },
+      include: {
+        usuario: true,
+        instituicao: true
+      }
+    });
+
     if (!aluno) {
+      console.log('Aluno não encontrado para usuarioId:', alunoId);
       return res.status(404).json({ message: 'Aluno não encontrado' });
+    }
+
+    console.log('Aluno encontrado:', aluno);
+
+    // Se o usuário for uma instituição, verificar se o aluno pertence a ela
+    if (usuarioTipo === 'instituicao') {
+      const instituicao = await prisma.instituicao.findUnique({
+        where: { usuarioId }
+      });
+
+      if (!instituicao) {
+        console.log('Instituição não encontrada para usuarioId:', usuarioId);
+        return res.status(403).json({ message: 'Instituição não encontrada' });
+      }
+
+      if (aluno.instituicaoId !== instituicao.id) {
+        console.log('Aluno não pertence à instituição:', {
+          alunoInstituicaoId: aluno.instituicaoId,
+          instituicaoId: instituicao.id
+        });
+        return res.status(403).json({ message: 'Aluno não pertence a esta instituição' });
+      }
     }
 
     // Verificar se já existe uma vinculação
     const vinculoExistente = await prisma.responsavelAluno.findFirst({
       where: {
-        responsavelId: responsavel.id,
-        alunoId: Number(alunoId)
+        alunoId: aluno.id,
+        responsavelId: responsavel.id
       }
     });
 
     if (vinculoExistente) {
-      return res.status(400).json({ message: 'Aluno já vinculado a este responsável' });
+      console.log('Vinculação já existe:', vinculoExistente);
+      return res.status(400).json({ message: 'Aluno já está vinculado a este responsável' });
     }
 
     // Criar a vinculação
     const vinculo = await prisma.responsavelAluno.create({
       data: {
+        alunoId: aluno.id,
         responsavelId: responsavel.id,
-        alunoId: Number(alunoId),
         parentesco
       },
       include: {
@@ -192,6 +244,8 @@ router.post('/vincular-aluno', authMiddleware, async (req, res) => {
       }
     });
 
+    console.log('Vinculação criada com sucesso:', vinculo);
+
     res.status(201).json({
       message: 'Aluno vinculado com sucesso',
       vinculo: {
@@ -199,13 +253,11 @@ router.post('/vincular-aluno', authMiddleware, async (req, res) => {
         aluno: {
           id: vinculo.aluno.id,
           nome: vinculo.aluno.usuario.nome,
-          matricula: vinculo.aluno.matricula,
-          turmaId: vinculo.aluno.turmaId
+          matricula: vinculo.aluno.matricula
         },
         responsavel: {
           id: vinculo.responsavel.id,
-          nome: vinculo.responsavel.usuario.nome,
-          email: vinculo.responsavel.usuario.email
+          nome: vinculo.responsavel.usuario.nome
         },
         parentesco: vinculo.parentesco
       }

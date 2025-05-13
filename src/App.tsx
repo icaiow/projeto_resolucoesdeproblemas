@@ -46,66 +46,69 @@ import Materiais from "./pages/Materiais";
 import Notificacoes from "./pages/Notificacoes";
 import Documentos from "./pages/Documentos";
 import HistoricoAluno from "./pages/HistoricoAluno";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/login-institucional" element={<LoginInstitucional />} />
-          <Route path="/login-aluno" element={<LoginAluno />} />
-          <Route path="/login-responsavel" element={<LoginResponsavel />} />
-          {/* Removida a rota para cadastro-responsavel */}
-          <Route element={<Layout />}>
-            <Route path="/perfil-institucional" element={<PerfilInstitucional />} />
-            <Route path="/escuta-digital" element={<EscutaDigital />} />
-            <Route path="/gerenciar-escutas" element={<GerenciarEscutas />} />
-            <Route path="/gerenciar-denuncias" element={<GerenciarDenuncias />} />
-            <Route path="/gerenciar-materiais" element={<GerenciarMateriais />} />
-            <Route path="/informar-prevenir" element={<InformarPrevenir />} />
-            <Route path="/gestao-institucional" element={<GestaoInstitucional />} />
-            <Route path="/denuncia" element={<Denuncia />} />
-            <Route path="/denuncia/:id" element={<Denuncia />} />
-            <Route path="/historico-denuncias" element={<HistoricoDenuncias />} />
-            <Route path="/comunicacao" element={<Comunicacao />} />
-            <Route path="/materiais" element={<Materiais />} />
-            <Route path="/notificacoes" element={<Notificacoes />} />
-            <Route path="/documentos" element={<Documentos />} />
-            <Route path="/monitoramento" element={<Monitoramento />} />
-            <Route path="/home-alunos" element={<HomeAlunos />} />
-            <Route path="/home-responsaveis" element={<HomeResponsaveis />} />
-            <Route path="/home-institucional" element={<HomeInstitucional />} />
-            <Route path="/aluno-view/:id" element={<AlunoView />} />
-            <Route path="/instituicao-orientacoes" element={<InstituicaoOrientacoes />} />
-            <Route path="/enviar-escuta" element={<EnviarEscuta />} />
-            <Route path="/editar-perfil" element={<EditarPerfil />} />
-            <Route path="/editar-perfil-aluno" element={<EditarPerfilAluno />} />
-            <Route path="/editar-perfil-responsavel" element={<EditarPerfilResponsavel />} />
-            <Route path="/bullying-info" element={<BullyingInfo />} />
-            <Route path="/buscar-ajuda" element={<BuscarAjuda />} />
-            <Route path="/contatos-psicologos" element={<ContatosPsicologos />} />
-            <Route path="/atividades-recentes" element={<AtividadesRecentes />} />
-            <Route path="/atividades/:tipo/:id" element={<AtividadeDetalhes />} />
-            <Route path="/materiais-educativos" element={<MateriaisEducativos />} />
-            <Route path="/relatorios" element={<Relatorios />} />
-            <Route path="/configuracoes" element={<Configuracoes />} />
-            <Route path="/gestao-alunos" element={<GestaoAlunos />} />
-            <Route path="/perfil-aluno" element={<PerfilAluno />} />
-            <Route path="/perfil-aluno/:id" element={<PerfilAluno />} />
-            <Route path="/responsaveis-aluno" element={<ResponsaveisAluno />} />
-            <Route path="/escuta-aluno" element={<EscutaAluno />} />
-            <Route path="/eventos-campanhas" element={<EventosCampanhas />} />
-            <Route path="/historico-aluno/:id" element={<HistoricoAluno />} />
-          </Route>
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/login-institucional" element={<LoginInstitucional />} />
+            <Route path="/login-aluno" element={<LoginAluno />} />
+            <Route path="/login-responsavel" element={<LoginResponsavel />} />
+            {/* Removida a rota para cadastro-responsavel */}
+            <Route element={<Layout />}>
+              <Route path="/perfil-institucional" element={<PerfilInstitucional />} />
+              <Route path="/escuta-digital" element={<EscutaDigital />} />
+              <Route path="/gerenciar-escutas" element={<GerenciarEscutas />} />
+              <Route path="/gerenciar-denuncias" element={<GerenciarDenuncias />} />
+              <Route path="/gerenciar-materiais" element={<GerenciarMateriais />} />
+              <Route path="/informar-prevenir" element={<InformarPrevenir />} />
+              <Route path="/gestao-institucional" element={<GestaoInstitucional />} />
+              <Route path="/denuncia" element={<Denuncia />} />
+              <Route path="/denuncia/:id" element={<Denuncia />} />
+              <Route path="/historico-denuncias" element={<HistoricoDenuncias />} />
+              <Route path="/comunicacao" element={<Comunicacao />} />
+              <Route path="/materiais" element={<Materiais />} />
+              <Route path="/notificacoes" element={<Notificacoes />} />
+              <Route path="/documentos" element={<Documentos />} />
+              <Route path="/monitoramento" element={<Monitoramento />} />
+              <Route path="/home-alunos" element={<HomeAlunos />} />
+              <Route path="/home-responsaveis" element={<HomeResponsaveis />} />
+              <Route path="/home-institucional" element={<HomeInstitucional />} />
+              <Route path="/aluno-view/:id" element={<AlunoView />} />
+              <Route path="/instituicao-orientacoes" element={<InstituicaoOrientacoes />} />
+              <Route path="/enviar-escuta" element={<EnviarEscuta />} />
+              <Route path="/editar-perfil" element={<EditarPerfil />} />
+              <Route path="/editar-perfil-aluno" element={<EditarPerfilAluno />} />
+              <Route path="/editar-perfil-responsavel" element={<EditarPerfilResponsavel />} />
+              <Route path="/bullying-info" element={<BullyingInfo />} />
+              <Route path="/buscar-ajuda" element={<BuscarAjuda />} />
+              <Route path="/contatos-psicologos" element={<ContatosPsicologos />} />
+              <Route path="/atividades-recentes" element={<AtividadesRecentes />} />
+              <Route path="/atividades/:tipo/:id" element={<AtividadeDetalhes />} />
+              <Route path="/materiais-educativos" element={<MateriaisEducativos />} />
+              <Route path="/relatorios" element={<Relatorios />} />
+              <Route path="/configuracoes" element={<Configuracoes />} />
+              <Route path="/gestao-alunos" element={<GestaoAlunos />} />
+              <Route path="/perfil-aluno" element={<PerfilAluno />} />
+              <Route path="/perfil-aluno/:id" element={<PerfilAluno />} />
+              <Route path="/responsaveis-aluno" element={<ResponsaveisAluno />} />
+              <Route path="/escuta-aluno" element={<EscutaAluno />} />
+              <Route path="/eventos-campanhas" element={<EventosCampanhas />} />
+              <Route path="/historico-aluno/:id" element={<HistoricoAluno />} />
+            </Route>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

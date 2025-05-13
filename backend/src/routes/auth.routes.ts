@@ -202,6 +202,7 @@ router.post('/login', async (req, res) => {
     const { email, matricula, senha } = req.body;
 
     let usuario;
+    let instituicao = null;
 
     if (matricula) {
       // Buscar o aluno pela matrícula
@@ -223,6 +224,13 @@ router.post('/login', async (req, res) => {
 
       if (!usuario) {
         return res.status(400).json({ message: 'Credenciais inválidas' });
+      }
+
+      // Se for uma instituição, buscar o ID da instituição
+      if (usuario.tipo === 'instituicao') {
+        instituicao = await prisma.instituicao.findUnique({
+          where: { usuarioId: usuario.id }
+        });
       }
     }
 
@@ -248,6 +256,7 @@ router.post('/login', async (req, res) => {
         email: usuario.email,
         nome: usuario.nome,
         tipo: usuario.tipo,
+        instituicaoId: instituicao?.id || null
       },
     });
   } catch (error) {
@@ -482,6 +491,159 @@ router.post('/criar-usuarios-teste', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Erro ao criar usuários de teste:', error);
     res.status(500).json({ message: 'Erro ao criar usuários de teste' });
+  }
+});
+
+// Rota para listar usuários da instituição por tipo
+router.get('/usuarios/instituicao', authMiddleware, async (req, res) => {
+  try {
+    const { tipo } = req.query;
+    const usuarioId = req.usuario?.id;
+    console.log('Buscando usuários do tipo:', tipo, 'para instituição:', usuarioId);
+    
+    if (!tipo) {
+      console.log('Tipo não especificado na requisição');
+      return res.status(400).json({ message: 'Tipo de usuário não especificado' });
+    }
+
+    // Verificar se o usuário é uma instituição
+    const instituicao = await prisma.instituicao.findUnique({
+      where: { usuarioId }
+    });
+
+    if (!instituicao) {
+      console.log('Usuário não é uma instituição');
+      return res.status(403).json({ message: 'Apenas instituições podem acessar esta rota' });
+    }
+
+    // Buscar usuários do tipo especificado que pertencem à instituição
+    let usuarios;
+    const tipoLower = tipo.toString().toLowerCase();
+    console.log('Tipo convertido para minúsculas:', tipoLower);
+    
+    if (tipoLower === 'aluno') {
+      console.log('Buscando alunos da instituição...');
+      usuarios = await prisma.usuario.findMany({
+        where: { 
+          tipo: tipoLower,
+          aluno: {
+            instituicaoId: instituicao.id
+          }
+        },
+        include: {
+          aluno: true
+        }
+      });
+      console.log('Alunos encontrados:', usuarios);
+    } else if (tipoLower === 'responsavel') {
+      console.log('Buscando responsáveis...');
+      usuarios = await prisma.usuario.findMany({
+        where: { tipo: tipoLower },
+        include: {
+          responsavel: true
+        }
+      });
+      console.log('Responsáveis encontrados:', usuarios);
+    } else {
+      console.log('Tipo de usuário não suportado:', tipoLower);
+      return res.status(400).json({ message: 'Tipo de usuário não suportado' });
+    }
+
+    // Formatar a resposta de acordo com o tipo
+    console.log('Formatando resposta...');
+    const usuariosFormatados = await Promise.all(usuarios.map(async (usuario: any) => {
+      console.log('Formatando usuário:', usuario);
+      const base = {
+        id: usuario.id,
+        nome: usuario.nome,
+        email: usuario.email,
+        tipo: usuario.tipo,
+        ultimoAcesso: usuario.updatedAt
+      };
+
+      if (tipoLower === 'aluno' && usuario.aluno) {
+        const alunoFormatado = {
+          ...base,
+          matricula: usuario.aluno.matricula,
+          turmaId: usuario.aluno.turmaId,
+          dataNascimento: usuario.aluno.dataNascimento
+        };
+        console.log('Aluno formatado:', alunoFormatado);
+        return alunoFormatado;
+      }
+
+      if (tipoLower === 'responsavel' && usuario.responsavel) {
+        const responsavelFormatado = {
+          ...base,
+          cpf: usuario.responsavel.cpf,
+          telefone: usuario.responsavel.telefone
+        };
+        console.log('Responsável formatado:', responsavelFormatado);
+        return responsavelFormatado;
+      }
+
+      console.log('Usuário base formatado:', base);
+      return base;
+    }));
+
+    console.log('Total de usuários formatados:', usuariosFormatados.length);
+    console.log('Resposta final:', usuariosFormatados);
+    res.json(usuariosFormatados);
+  } catch (error) {
+    console.error('Erro detalhado ao listar usuários da instituição:', error);
+    res.status(500).json({ message: 'Erro ao listar usuários da instituição' });
+  }
+});
+
+// Rota para validar o token
+router.get('/validate', authMiddleware, async (req, res) => {
+  try {
+    const usuarioId = req.usuario?.id;
+    const usuarioTipo = req.usuario?.tipo;
+
+    console.log('Validando token para usuário:', {
+      usuarioId,
+      usuarioTipo
+    });
+
+    if (!usuarioId) {
+      console.log('Token inválido: usuário não encontrado');
+      return res.status(401).json({ message: 'Token inválido' });
+    }
+
+    // Buscar informações atualizadas do usuário
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: usuarioId },
+      include: {
+        instituicao: true
+      }
+    });
+
+    if (!usuario) {
+      console.log('Token inválido: usuário não encontrado no banco');
+      return res.status(401).json({ message: 'Token inválido' });
+    }
+
+    console.log('Token válido para usuário:', {
+      id: usuario.id,
+      nome: usuario.nome,
+      tipo: usuario.tipo,
+      instituicaoId: usuario.instituicao?.id
+    });
+
+    res.json({
+      valid: true,
+      usuario: {
+        id: usuario.id,
+        nome: usuario.nome,
+        email: usuario.email,
+        tipo: usuario.tipo,
+        instituicaoId: usuario.instituicao?.id
+      }
+    });
+  } catch (error) {
+    console.error('Erro ao validar token:', error);
+    res.status(401).json({ message: 'Token inválido' });
   }
 });
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,18 +13,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { AuthContext } from "@/contexts/AuthContext";
 
 interface Aluno {
-  id: string;
+  id: number;
+  usuarioId: number;
   nome: string;
+  email: string;
   turma: string;
   matricula: string;
+  dataNascimento: string;
   status: "ativo" | "inativo" | "transferido";
   ultimoAcesso: string;
-  escutas: number;
-  denuncias: number;
-  responsavel: string;
-  idResponsavel?: string;
+  dataCadastro: string;
+  instituicaoId?: number | null;
+  instituicaoNome?: string | null;
 }
 
 interface Responsavel {
@@ -36,18 +48,25 @@ interface Responsavel {
 
 const GestaoAlunos = () => {
   const navigate = useNavigate();
+  const { usuario } = useContext(AuthContext);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("todos");
   const [filterTurma, setFilterTurma] = useState<string>("todos");
   const [selectedAluno, setSelectedAluno] = useState<Aluno | null>(null);
   const [selectedResponsavel, setSelectedResponsavel] = useState<Responsavel | null>(null);
   const [showVincularModal, setShowVincularModal] = useState(false);
+  const [showVincularInstituicaoModal, setShowVincularInstituicaoModal] = useState(false);
   const [alunosData, setAlunosData] = useState<Aluno[]>([]);
   const [responsaveisData, setResponsaveisData] = useState<Responsavel[]>([]);
   const [isLoadingAlunos, setIsLoadingAlunos] = useState(true);
   const [isLoadingResponsaveis, setIsLoadingResponsaveis] = useState(true);
   const [isVinculando, setIsVinculando] = useState(false);
+  const [isVinculandoInstituicao, setIsVinculandoInstituicao] = useState(false);
   const [parentesco, setParentesco] = useState<string>("");
+  const [alunoParaVincular, setAlunoParaVincular] = useState<Aluno | null>(null);
+  const [matriculaAluno, setMatriculaAluno] = useState("");
+  const [alunoEncontrado, setAlunoEncontrado] = useState<Aluno | null>(null);
+  const [isBuscandoAluno, setIsBuscandoAluno] = useState(false);
 
   useEffect(() => {
     // Buscar dados de alunos e responsáveis do banco de dados
@@ -95,8 +114,8 @@ const GestaoAlunos = () => {
       setIsLoadingAlunos(true);
       console.log("Iniciando busca de alunos...");
       
-      const response = await api.get('/auth/usuarios', {
-        params: { tipo: 'ALUNO' }
+      const response = await api.get('/auth/usuarios/instituicao', {
+        params: { tipo: 'aluno' }
       });
       
       console.log("Resposta completa da API para alunos:", {
@@ -115,22 +134,22 @@ const GestaoAlunos = () => {
           return;
         }
         
-        const alunosMapeados = response.data.map((aluno: any) => {
+        const alunosMapeados: Aluno[] = response.data.map((aluno: any) => {
           console.log("Processando aluno:", aluno);
-          const alunoMapeado = {
-            id: aluno.id,
+          return {
+            id: Number(aluno.id),
+            usuarioId: Number(aluno.usuarioId),
             nome: aluno.nome || 'Nome não disponível',
+            email: aluno.email || 'Email não disponível',
             turma: aluno.turma || 'Turma não definida',
             matricula: aluno.matricula || 'Matrícula não disponível',
+            dataNascimento: aluno.dataNascimento || new Date().toISOString(),
             status: aluno.status || 'ativo',
             ultimoAcesso: aluno.ultimoAcesso || new Date().toISOString(),
-            escutas: aluno.escutas || 0,
-            denuncias: aluno.denuncias || 0,
-            responsavel: aluno.responsavel || 'Não vinculado',
-            idResponsavel: aluno.idResponsavel || null
+            dataCadastro: aluno.dataCadastro || new Date().toISOString(),
+            instituicaoId: aluno.instituicaoId ? Number(aluno.instituicaoId) : null,
+            instituicaoNome: aluno.instituicaoNome || null
           };
-          console.log("Aluno mapeado:", alunoMapeado);
-          return alunoMapeado;
         });
         
         console.log("Total de alunos mapeados:", alunosMapeados.length);
@@ -160,7 +179,7 @@ const GestaoAlunos = () => {
       console.log("Iniciando busca de responsáveis...");
       
       const response = await api.get('/auth/usuarios', {
-        params: { tipo: 'RESPONSAVEL' }
+        params: { tipo: 'responsavel' }
       });
       
       console.log("Resposta completa da API para responsáveis:", {
@@ -252,55 +271,152 @@ const GestaoAlunos = () => {
   });
 
   const handleVincular = async () => {
-    if (selectedAluno && selectedResponsavel && parentesco) {
-      try {
-        setIsVinculando(true);
-        console.log("Iniciando vinculação entre aluno e responsável...");
-        console.log("Dados para vinculação:", { 
-          alunoId: selectedAluno.id, 
-          parentesco 
-        });
-        
-        // Enviar solicitação para vincular aluno e responsável
-        const response = await api.post('/api/responsaveis/vincular-aluno', {
-          alunoId: selectedAluno.id,
-          parentesco
-        });
-        
-        console.log("Resposta da vinculação:", response.data);
-        
-        // Atualizar o estado local após vinculação bem-sucedida
-        const updatedAlunos = alunosData.map(aluno => 
-          aluno.id === selectedAluno.id 
-            ? { 
-                ...aluno, 
-                responsavel: selectedResponsavel.nome, 
-                idResponsavel: selectedResponsavel.id,
-                parentesco: parentesco 
-              } 
-            : aluno
-        );
-        
-        setAlunosData(updatedAlunos);
-        console.log("Vinculação realizada com sucesso!");
-        toast.success(`Aluno ${selectedAluno.nome} vinculado com sucesso ao responsável ${selectedResponsavel.nome}!`);
-        
-        // Limpar seleções
-        setSelectedAluno(null);
-        setSelectedResponsavel(null);
-        setParentesco("");
-        
-        // Atualizar dados
-        fetchAlunos();
-      } catch (error: any) {
-        console.error("Erro ao vincular aluno e responsável:", error);
-        const errorMessage = error.response?.data?.message || "Não foi possível realizar a vinculação. Tente novamente mais tarde.";
-        toast.error(errorMessage);
-      } finally {
-        setIsVinculando(false);
-      }
-    } else {
+    if (!selectedAluno || !selectedResponsavel || !parentesco) {
       toast.error("Por favor, selecione um aluno, um responsável e informe o parentesco.");
+      return;
+    }
+
+    try {
+      setIsVinculando(true);
+      const alunoId = Number(selectedAluno.id);
+      const responsavelId = Number(selectedResponsavel.id);
+
+      if (isNaN(alunoId) || isNaN(responsavelId)) {
+        throw new Error("IDs inválidos");
+      }
+
+      console.log("Iniciando vinculação:", { alunoId, responsavelId, parentesco });
+      
+      const response = await api.post('/responsaveis/vincular-aluno', {
+        alunoId,
+        responsavelId,
+        parentesco
+      });
+      
+      console.log("Resposta da vinculação:", response.data);
+      
+      // Atualizar o estado local após vinculação bem-sucedida
+      const updatedAlunos = alunosData.map(aluno => 
+        aluno.id === selectedAluno.id 
+          ? { 
+              ...aluno, 
+              responsavel: selectedResponsavel.nome, 
+              idResponsavel: selectedResponsavel.id,
+              parentesco: parentesco 
+            } 
+          : aluno
+      );
+      
+      setAlunosData(updatedAlunos);
+      console.log("Vinculação realizada com sucesso!");
+      toast.success(`Aluno ${selectedAluno.nome} vinculado com sucesso ao responsável ${selectedResponsavel.nome}!`);
+      
+      // Limpar seleções
+      setSelectedAluno(null);
+      setSelectedResponsavel(null);
+      setParentesco("");
+      
+      // Atualizar dados
+      fetchAlunos();
+    } catch (error: any) {
+      console.error("Erro ao vincular aluno e responsável:", error);
+      const errorMessage = error.response?.data?.message || "Não foi possível realizar a vinculação. Tente novamente mais tarde.";
+      toast.error(errorMessage);
+    } finally {
+      setIsVinculando(false);
+    }
+  };
+
+  const buscarAlunoPorMatricula = async () => {
+    if (!matriculaAluno.trim()) {
+      toast.error("Por favor, informe a matrícula do aluno.");
+      return;
+    }
+
+    try {
+      setIsBuscandoAluno(true);
+      console.log("Buscando aluno pela matrícula:", matriculaAluno);
+      
+      const response = await api.get(`/alunos/buscar/${matriculaAluno}`);
+      
+      console.log("Resposta da busca:", response.data);
+      
+      if (response.data) {
+        const aluno = response.data;
+        
+        // Verificar se o aluno já está vinculado a outra instituição
+        if (aluno.instituicaoId && aluno.instituicaoId !== usuario?.instituicaoId) {
+          toast.error(`Este aluno já está vinculado à instituição: ${aluno.instituicaoNome}`);
+          setAlunoEncontrado(null);
+          return;
+        }
+        
+        setAlunoEncontrado(aluno);
+        toast.success("Aluno encontrado! Verifique os dados antes de confirmar a vinculação.");
+      } else {
+        toast.error("Nenhum aluno encontrado com esta matrícula.");
+        setAlunoEncontrado(null);
+      }
+    } catch (error: any) {
+      console.error("Erro ao buscar aluno:", error);
+      const errorMessage = error.response?.data?.message || "Erro ao buscar aluno. Tente novamente.";
+      toast.error(errorMessage);
+      setAlunoEncontrado(null);
+    } finally {
+      setIsBuscandoAluno(false);
+    }
+  };
+
+  const handleVincularInstituicao = async () => {
+    if (!alunoEncontrado) {
+      toast.error("Por favor, busque um aluno válido primeiro.");
+      return;
+    }
+
+    if (!usuario?.instituicaoId) {
+      toast.error("Você precisa estar logado como instituição para fazer esta operação.");
+      return;
+    }
+
+    try {
+      setIsVinculandoInstituicao(true);
+      console.log("Iniciando vinculação do aluno à instituição:", alunoEncontrado);
+      
+      const response = await api.post('/instituicoes/vincular-aluno', {
+        alunoId: alunoEncontrado.id
+      });
+      
+      console.log("Resposta da vinculação:", response.data);
+      
+      // Atualizar o estado local após vinculação bem-sucedida
+      const updatedAlunos = alunosData.map(aluno => 
+        aluno.id === alunoEncontrado.id 
+          ? { 
+              ...aluno, 
+              status: 'ativo' as const, 
+              instituicaoId: usuario.instituicaoId,
+              instituicaoNome: usuario.nome
+            } 
+          : aluno
+      );
+      
+      setAlunosData(updatedAlunos);
+      console.log("Vinculação realizada com sucesso!");
+      toast.success(`Aluno ${alunoEncontrado.nome} vinculado com sucesso à instituição!`);
+      
+      // Fechar o modal e limpar estados
+      setShowVincularInstituicaoModal(false);
+      setAlunoEncontrado(null);
+      setMatriculaAluno("");
+      
+      // Atualizar dados
+      fetchAlunos();
+    } catch (error: any) {
+      console.error("Erro ao vincular aluno à instituição:", error);
+      const errorMessage = error.response?.data?.message || "Não foi possível realizar a vinculação. Tente novamente mais tarde.";
+      toast.error(errorMessage);
+    } finally {
+      setIsVinculandoInstituicao(false);
     }
   };
 
@@ -331,10 +447,10 @@ const GestaoAlunos = () => {
             <div className="space-y-2">
               <label className="text-sm font-medium">Aluno</label>
               <Select
-                value={selectedAluno?.id}
+                value={selectedAluno?.id?.toString()}
                 onValueChange={(value) => {
                   console.log("Select de aluno alterado:", value);
-                  const aluno = alunosData.find(a => a.id === value);
+                  const aluno = alunosData.find(a => a.id.toString() === value);
                   console.log("Aluno selecionado:", aluno);
                   setSelectedAluno(aluno || null);
                 }}
@@ -350,7 +466,7 @@ const GestaoAlunos = () => {
                     </SelectItem>
                   ) : (
                     alunosData.map((aluno) => (
-                      <SelectItem key={aluno.id} value={aluno.id}>
+                      <SelectItem key={aluno.id} value={aluno.id.toString()}>
                         {aluno.nome} - {aluno.turma} ({aluno.matricula})
                       </SelectItem>
                     ))
@@ -446,6 +562,90 @@ const GestaoAlunos = () => {
             </p>
           )}
         </Card>
+
+        {/* Botão para Vincular Aluno à Instituição */}
+        <Card className="p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">Vincular Aluno à Instituição</h2>
+            <Button 
+              onClick={() => setShowVincularInstituicaoModal(true)}
+              className="bg-purple-600 hover:bg-purple-700"
+            >
+              Vincular Novo Aluno
+            </Button>
+          </div>
+          <p className="text-sm text-gray-600 mb-4">
+            Selecione um aluno para vinculá-lo à sua instituição. Alunos vinculados terão acesso ao sistema.
+          </p>
+        </Card>
+
+        {/* Modal de Vincular Aluno à Instituição */}
+        <Dialog open={showVincularInstituicaoModal} onOpenChange={setShowVincularInstituicaoModal}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Vincular Aluno à Instituição</DialogTitle>
+              <DialogDescription>
+                Digite a matrícula do aluno para vincular à sua instituição.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Matrícula do Aluno</Label>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Digite a matrícula do aluno"
+                    value={matriculaAluno}
+                    onChange={(e) => setMatriculaAluno(e.target.value)}
+                    disabled={isBuscandoAluno || isVinculandoInstituicao}
+                  />
+                  <Button
+                    onClick={buscarAlunoPorMatricula}
+                    disabled={!matriculaAluno.trim() || isBuscandoAluno || isVinculandoInstituicao}
+                    className="bg-purple-600 hover:bg-purple-700"
+                  >
+                    {isBuscandoAluno ? "Buscando..." : "Buscar"}
+                  </Button>
+                </div>
+              </div>
+
+              {alunoEncontrado && (
+                <div className="p-4 bg-gray-50 rounded-md space-y-2">
+                  <h4 className="font-medium mb-2">Dados do Aluno</h4>
+                  <p className="text-sm"><strong>Nome:</strong> {alunoEncontrado.nome}</p>
+                  <p className="text-sm"><strong>Matrícula:</strong> {alunoEncontrado.matricula}</p>
+                  <p className="text-sm"><strong>Turma:</strong> {alunoEncontrado.turma}</p>
+                  <p className="text-sm"><strong>Status:</strong> {alunoEncontrado.status}</p>
+                  {alunoEncontrado.instituicaoId && (
+                    <p className="text-sm text-yellow-600">
+                      <strong>Atenção:</strong> Este aluno já está vinculado à instituição: {alunoEncontrado.instituicaoNome}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowVincularInstituicaoModal(false);
+                    setAlunoEncontrado(null);
+                    setMatriculaAluno("");
+                  }}
+                  disabled={isVinculandoInstituicao}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={handleVincularInstituicao}
+                  disabled={!alunoEncontrado || isVinculandoInstituicao}
+                  className="bg-purple-600 hover:bg-purple-700"
+                >
+                  {isVinculandoInstituicao ? "Vinculando..." : "Confirmar Vinculação"}
+                </Button>
+              </DialogFooter>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <Card className="p-4">
@@ -548,17 +748,15 @@ const GestaoAlunos = () => {
                       </p>
                       <div className="flex items-center gap-4 text-sm text-gray-500">
                         <div className="flex items-center gap-1">
-                          <MessageSquare className="h-4 w-4" />
-                          <span>{aluno.escutas} escutas</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <AlertTriangle className="h-4 w-4" />
-                          <span>{aluno.denuncias} denúncias</span>
-                        </div>
-                        <div className="flex items-center gap-1">
                           <Clock className="h-4 w-4" />
                           <span>Último acesso: {aluno.ultimoAcesso}</span>
                         </div>
+                        {aluno.instituicaoNome && (
+                          <div className="flex items-center gap-1">
+                            <GraduationCap className="h-4 w-4" />
+                            <span>Instituição: {aluno.instituicaoNome}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">

@@ -104,35 +104,123 @@ router.post('/vincular-aluno', authMiddleware, async (req, res) => {
   try {
     const { alunoId } = req.body;
     const usuarioId = req.usuario?.id;
+    const usuarioTipo = req.usuario?.tipo;
+
+    console.log('Iniciando vinculação de aluno:', {
+      alunoId,
+      usuarioId,
+      usuarioTipo,
+      body: req.body,
+      headers: req.headers
+    });
+
+    // Verificar se o usuário está autenticado
+    if (!usuarioId) {
+      console.log('Usuário não autenticado');
+      return res.status(401).json({ message: 'Usuário não autenticado' });
+    }
 
     // Verificar se o usuário é uma instituição
-    const instituicao = await prisma.instituicao.findUnique({
-      where: { usuarioId },
+    const instituicao = await prisma.instituicao.findFirst({
+      where: { 
+        usuarioId: usuarioId 
+      },
+      include: {
+        usuario: true
+      }
+    });
+
+    console.log('Instituição encontrada:', {
+      id: instituicao?.id,
+      nome: instituicao?.usuario.nome,
+      usuarioId: instituicao?.usuarioId
     });
 
     if (!instituicao) {
-      return res.status(403).json({ message: 'Usuário não é uma instituição' });
+      console.log('Usuário não é uma instituição. Tipo:', usuarioTipo);
+      return res.status(403).json({ 
+        message: 'Usuário não é uma instituição',
+        usuarioTipo: usuarioTipo
+      });
     }
 
     // Verificar se o aluno existe
     const aluno = await prisma.aluno.findUnique({
       where: { id: alunoId },
+      include: {
+        usuario: true,
+        instituicao: {
+          include: {
+            usuario: true
+          }
+        }
+      }
+    });
+
+    console.log('Aluno encontrado:', {
+      id: aluno?.id,
+      nome: aluno?.usuario.nome,
+      matricula: aluno?.matricula,
+      instituicaoId: aluno?.instituicaoId,
+      instituicaoNome: aluno?.instituicao?.usuario.nome
     });
 
     if (!aluno) {
+      console.log('Aluno não encontrado');
       return res.status(404).json({ message: 'Aluno não encontrado' });
+    }
+
+    // Verificar se o aluno já está vinculado a outra instituição
+    if (aluno.instituicaoId && aluno.instituicaoId !== instituicao.id) {
+      console.log('Aluno já vinculado a outra instituição:', {
+        alunoInstituicaoId: aluno.instituicaoId,
+        instituicaoAtual: instituicao.id,
+        instituicaoNome: aluno.instituicao?.usuario.nome
+      });
+      return res.status(400).json({ 
+        message: `Este aluno já está vinculado à instituição: ${aluno.instituicao?.usuario.nome}` 
+      });
     }
 
     // Atualizar o aluno com a instituição
     const alunoAtualizado = await prisma.aluno.update({
       where: { id: alunoId },
-      data: { instituicaoId: instituicao.id },
+      data: { 
+        instituicaoId: instituicao.id 
+      },
+      include: {
+        usuario: true,
+        instituicao: {
+          include: {
+            usuario: true
+          }
+        }
+      }
     });
 
-    res.json(alunoAtualizado);
+    console.log('Aluno atualizado com sucesso:', {
+      id: alunoAtualizado.id,
+      nome: alunoAtualizado.usuario.nome,
+      matricula: alunoAtualizado.matricula,
+      instituicaoId: alunoAtualizado.instituicaoId,
+      instituicaoNome: alunoAtualizado.instituicao?.usuario.nome
+    });
+
+    res.json({
+      message: 'Aluno vinculado com sucesso',
+      aluno: {
+        id: alunoAtualizado.id,
+        nome: alunoAtualizado.usuario.nome,
+        matricula: alunoAtualizado.matricula,
+        instituicaoNome: alunoAtualizado.instituicao?.usuario.nome
+      }
+    });
   } catch (error) {
-    console.error('Erro ao vincular aluno à instituição:', error);
-    res.status(500).json({ message: 'Erro ao vincular aluno à instituição' });
+    console.error('Erro detalhado ao vincular aluno à instituição:', error);
+    res.status(500).json({ 
+      message: 'Erro ao vincular aluno à instituição',
+      error: error instanceof Error ? error.message : 'Erro desconhecido'
+    });
   }
 });
 

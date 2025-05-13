@@ -7,40 +7,42 @@ const api = axios.create({
   },
 });
 
-// Interceptor para adicionar o token de autenticação e tratamento de erros
+// Interceptor para adicionar o token de autenticação
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
+    console.log('Token encontrado no localStorage:', token ? 'Sim' : 'Não');
+    
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      console.log('Token adicionado ao header:', config.headers.Authorization);
+    } else {
+      console.log('Nenhum token encontrado para adicionar ao header');
     }
+    
     return config;
   },
   (error) => {
+    console.error('Erro no interceptor de requisição:', error);
     return Promise.reject(error);
   }
 );
 
-// Adicionar interceptor de resposta para tratamento de erros
+// Interceptor para tratamento de erros
 api.interceptors.response.use(
   (response) => {
     return response;
   },
   (error) => {
-    if (error.response) {
-      // O servidor respondeu com um status de erro
-      console.error('Erro na resposta:', error.response.data);
-      if (error.response.status === 401) {
-        // Token expirado ou inválido
-        localStorage.removeItem('token');
-        window.location.href = '/login';
-      }
-    } else if (error.request) {
-      // A requisição foi feita mas não houve resposta
-      console.error('Erro na requisição:', error.request);
-    } else {
-      // Algo aconteceu na configuração da requisição
-      console.error('Erro:', error.message);
+    if (error.response?.status === 401) {
+      console.log('Erro de autenticação detectado');
+      // Limpar dados de autenticação
+      localStorage.removeItem('token');
+      localStorage.removeItem('usuario');
+      delete api.defaults.headers.common['Authorization'];
+      
+      // Redirecionar para a página de login
+      window.location.href = '/login';
     }
     return Promise.reject(error);
   }
