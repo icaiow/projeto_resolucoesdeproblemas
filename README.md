@@ -10,6 +10,7 @@ Sistema integrado para gestão institucional, focado na segurança e bem-estar d
 - [Funcionalidades](#funcionalidades)
 - [Tecnologias Utilizadas](#tecnologias-utilizadas)
 - [Estrutura do Projeto](#estrutura-do-projeto)
+- [Requisitos do Sistema](#requisitos-do-sistema)
 - [Instalação](#instalação)
 - [Configuração](#configuração)
 - [Uso](#uso)
@@ -54,21 +55,153 @@ O NoHate é uma plataforma completa para gestão escolar, com foco especial na s
 ## 🛠 Tecnologias Utilizadas
 
 ### Frontend
-- React
+- React 18.3
 - TypeScript
 - Tailwind CSS
 - Shadcn/ui
-- React Router
+- React Router v6
 - React Query
 - Lucide Icons
+- Vite
 
 ### Backend
 - Node.js
-- Express/NestJS
+- Express
 - PostgreSQL
 - Prisma
 - JWT
-- Redis (opcional)
+- TypeScript
+
+---
+
+## 💻 Requisitos do Sistema
+
+Antes de começar, certifique-se de ter instalado em sua máquina:
+
+- Node.js (versão 18 ou superior)
+- npm (versão 9 ou superior) ou yarn
+- PostgreSQL (versão 14 ou superior)
+- Git
+
+Para verificar as versões instaladas, execute:
+```bash
+node --version
+npm --version
+git --version
+```
+
+---
+
+## 🚀 Instalação
+
+### 1. Clone o Repositório
+```bash
+git clone https://github.com/icaiow/projeto_resolucoesdeproblemas.git
+cd projeto_resolucoesdeproblemas
+```
+
+### 2. Configuração do Frontend
+```bash
+# Instale as dependências do frontend
+npm install
+
+# Crie o arquivo de variáveis de ambiente
+cp .env.example .env
+
+# Inicie o servidor de desenvolvimento
+npm run dev
+```
+
+### 3. Configuração do Backend
+```bash
+# Entre na pasta do backend
+cd backend
+
+# Instale as dependências do backend
+npm install
+
+# Crie o arquivo de variáveis de ambiente
+cp .env.example .env
+
+# Execute as migrações do banco de dados
+npm run prisma:migrate
+
+# Gere os tipos do Prisma
+npm run prisma:generate
+
+# Inicie o servidor de desenvolvimento
+npm run dev
+```
+
+---
+
+## ⚙️ Configuração
+
+### Variáveis de Ambiente Frontend (.env)
+```env
+VITE_API_URL=http://localhost:3000
+VITE_APP_NAME=NoHate
+```
+
+### Variáveis de Ambiente Backend (.env)
+```env
+# Configuração do Banco de Dados
+DATABASE_URL="postgresql://seu_usuario:sua_senha@localhost:5432/nohate"
+
+# Configuração do JWT
+JWT_SECRET=sua_chave_secreta_muito_segura
+JWT_EXPIRES_IN=24h
+
+# Configuração do Servidor
+PORT=3000
+NODE_ENV=development
+```
+
+### Configuração do Banco de Dados
+
+1. Crie um banco de dados PostgreSQL:
+```sql
+CREATE DATABASE nohate;
+```
+
+2. Configure a URL do banco de dados no arquivo `.env` do backend
+
+3. Execute as migrações:
+```bash
+cd backend
+npm run prisma:migrate
+```
+
+---
+
+## 🔧 Verificação da Instalação
+
+Para verificar se tudo está funcionando corretamente:
+
+1. Frontend deve estar rodando em: `http://localhost:8080`
+2. Backend deve estar rodando em: `http://localhost:3000`
+3. Prisma Studio (interface do banco de dados) pode ser acessado com:
+```bash
+cd backend
+npm run prisma:studio
+```
+
+---
+
+## 🚨 Solução de Problemas Comuns
+
+### Erro de Conexão com o Banco de Dados
+- Verifique se o PostgreSQL está rodando
+- Confirme as credenciais no arquivo `.env`
+- Verifique se o banco de dados foi criado
+
+### Erro de Porta em Uso
+- Verifique se não há outros serviços rodando nas portas 3000 (backend) ou 5173 (frontend)
+- Altere as portas no arquivo de configuração se necessário
+
+### Erro de Dependências
+- Limpe o cache do npm: `npm cache clean --force`
+- Delete as pastas node_modules e reinstale as dependências
 
 ---
 
@@ -97,54 +230,6 @@ projeto/
     │   ├── middlewares/
     │   └── utils/
     └── prisma/
-```
-
----
-
-## 🚀 Instalação
-
-1. Clone o repositório:
-   ```bash
-   git clone https://github.com/icaiow/projeto_resolucoesdeproblemas.git
-   ```
-
-2. Instale as dependências do frontend:
-   ```bash
-   cd projeto_resolucoesdeproblemas
-   npm install
-   ```
-
-3. Instale as dependências do backend:
-   ```bash
-   cd backend
-   npm install
-   ```
-
-4. Configure as variáveis de ambiente:
-   ```bash
-   cp .env.example .env
-   ```
-
-5. Inicie o servidor de desenvolvimento:
-   ```bash
-   npm run dev
-   ```
-
----
-
-## ⚙️ Configuração
-
-### Variáveis de Ambiente
-
-```env
-# Frontend
-VITE_API_URL=http://localhost:8080
-VITE_APP_NAME=NoHate
-
-# Backend
-DATABASE_URL="postgresql://user:password@localhost:5432/db_name"
-JWT_SECRET=your_jwt_secret
-PORT=3000
 ```
 
 ---
