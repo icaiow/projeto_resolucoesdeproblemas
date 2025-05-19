@@ -2,37 +2,23 @@ version: '3.8'
 
 services:
   frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile.frontend
+    image: icaio/nohate-frontend:latest
     ports:
       - "80:80"
+    environment:
+      - RAILWAY_PUBLIC_DOMAIN=https://nohate-backend-production.up.railway.app
     depends_on:
       - backend
 
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: icaio/nohate-backend:latest
     ports:
       - "3000:3000"
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/nohate
-      - JWT_SECRET=seu_jwt_secret_aqui
+      - DATABASE_URL=postgresql://postgres:eukWMDgtKvMQtQvLQyDJhmlTcyfovIUm@postgres.railway.internal:5432/railway
+      - JWT_SECRET=f9d8c3e1a4b7c6d2e7f8g5h4i3j2k1l0m9n8o7p6q5r4s3t2u1v0w9x8y7z6a5
       - NODE_ENV=production
-    depends_on:
-      - db
-
-  db:
-    image: postgres:15-alpine
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=nohate
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+    restart: always
 
 volumes:
   postgres_data: 

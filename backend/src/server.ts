@@ -18,8 +18,17 @@ const prisma = new PrismaClient();
 const PORT = Number(process.env.PORT) || 3000;
 const HOST = '0.0.0.0';
 
+// Configuração do CORS
+const corsOptions = {
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  credentials: true,
+  maxAge: 86400 // 24 horas
+};
+
 // Middlewares
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Middleware de log
