@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { authMiddleware } from '../middlewares/auth.middleware';
 
@@ -191,8 +191,11 @@ router.post('/register', async (req, res) => {
       });
     }
   } catch (error) {
-    console.error('Erro ao registrar usuário:', error);
-    res.status(500).json({ message: 'Erro ao registrar usuário' });
+    console.error('Erro detalhado ao registrar usuário:', error);
+    res.status(500).json({ 
+      message: 'Erro ao registrar usuário',
+      error: error instanceof Error ? error.message : 'Erro desconhecido'
+    });
   }
 });
 

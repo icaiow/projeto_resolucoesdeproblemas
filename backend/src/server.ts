@@ -15,11 +15,18 @@ dotenv.config();
 
 const app = express();
 const prisma = new PrismaClient();
-const PORT = process.env.PORT || 3002;
+const PORT = Number(process.env.PORT) || 3000;
+const HOST = '0.0.0.0';
 
 // Middlewares
 app.use(cors());
 app.use(express.json());
+
+// Middleware de log
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  next();
+});
 
 // Rotas
 app.use('/api/auth', authRoutes);
@@ -31,17 +38,29 @@ app.use('/api/instituicoes', instituicaoRoutes);
 
 // Rota de teste
 app.get('/', (req, res) => {
-  res.send('api esta funcionando');
+  console.log('Rota de teste acessada');
+  res.send('API está funcionando!');
+});
+
+// Middleware de erro
+app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error('Erro:', err);
+  res.status(500).send('Erro interno do servidor');
 });
 
 // Iniciar o servidor
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
+const server = app.listen(PORT, HOST, () => {
+  console.log(`Servidor rodando em http://${HOST}:${PORT}`);
+  console.log('Ambiente:', process.env.NODE_ENV);
+  console.log('Porta:', PORT);
 });
 
 // Lidar com o encerramento do servidor
 process.on('SIGINT', async () => {
-  await prisma.$disconnect();
-  console.log('Conexão com o banco de dados fechada');
-  process.exit(0);
+  console.log('Encerrando servidor...');
+  server.close(async () => {
+    await prisma.$disconnect();
+    console.log('Conexão com o banco de dados fechada');
+    process.exit(0);
+  });
 });
