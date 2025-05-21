@@ -8,7 +8,7 @@ const Index = () => {
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
       <div className="max-w-4xl w-full space-y-8">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Bem-vindo à Plataforma Educacional</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Bem-vindo ao NoHate</h1>
           <p className="text-lg text-gray-600">Escolha como deseja acessar a plataforma</p>
             </div>
             
