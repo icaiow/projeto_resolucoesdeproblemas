@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, BookOpen, Download, FileText, Video } from "lucide-react";
 
-const Materiais = () => {
+const MateriaisResponsaveis = () => {
   const navigate = useNavigate();
 
   // Dados simulados de materiais
@@ -46,7 +46,10 @@ const Materiais = () => {
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center gap-4">
-          <Button variant="outline" onClick={() => navigate("/home-responsaveis")}>
+          <Button 
+            variant="outline" 
+            onClick={() => navigate("/home-responsaveis")}
+          >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Voltar
           </Button>
@@ -98,4 +101,4 @@ const Materiais = () => {
   );
 };
 
-export default Materiais; 
+export default MateriaisResponsaveis; 

@@ -211,10 +211,10 @@ const HomeResponsaveis = () => {
             </div>
             <div className="mt-auto">
               <Button 
-                onClick={() => navigate("/comunicacao")}
+                onClick={() => navigate("/comunicacao-responsaveis")}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white"
               >
-                Acessar
+                Comunicação
               </Button>
             </div>
           </div>
@@ -234,7 +234,7 @@ const HomeResponsaveis = () => {
             </div>
             <div className="mt-auto">
               <Button 
-                onClick={() => navigate("/materiais")}
+                onClick={() => navigate("/materiais-responsaveis")}
                 className="w-full bg-green-600 hover:bg-green-700 text-white"
               >
                 Ver Materiais

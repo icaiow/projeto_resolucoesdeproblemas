@@ -41,12 +41,14 @@ import ResponsaveisAluno from "./pages/ResponsaveisAluno";
 import EscutaAluno from "./pages/EscutaAluno";
 import EventosCampanhas from "./pages/EventosCampanhas";
 import HistoricoDenuncias from "./pages/HistoricoDenuncias";
-import Comunicacao from "./pages/Comunicacao";
-import Materiais from "./pages/Materiais";
 import Notificacoes from "./pages/Notificacoes";
 import Documentos from "./pages/Documentos";
 import HistoricoAluno from "./pages/HistoricoAluno";
 import { AuthProvider } from "@/contexts/AuthContext";
+import MateriaisInstitucional from "./pages/MateriaisInstitucional";
+import MateriaisResponsaveis from "./pages/MateriaisResponsaveis";
+import ComunicacaoInstitucional from "./pages/ComunicacaoInstitucional";
+import ComunicacaoResponsaveis from "./pages/ComunicacaoResponsaveis";
 
 const queryClient = new QueryClient();
 
@@ -74,8 +76,6 @@ const App = () => (
               <Route path="/denuncia" element={<Denuncia />} />
               <Route path="/denuncia/:id" element={<Denuncia />} />
               <Route path="/historico-denuncias" element={<HistoricoDenuncias />} />
-              <Route path="/comunicacao" element={<Comunicacao />} />
-              <Route path="/materiais" element={<Materiais />} />
               <Route path="/notificacoes" element={<Notificacoes />} />
               <Route path="/documentos" element={<Documentos />} />
               <Route path="/monitoramento" element={<Monitoramento />} />
@@ -103,6 +103,10 @@ const App = () => (
               <Route path="/escuta-aluno" element={<EscutaAluno />} />
               <Route path="/eventos-campanhas" element={<EventosCampanhas />} />
               <Route path="/historico-aluno/:id" element={<HistoricoAluno />} />
+              <Route path="/materiais-institucional" element={<MateriaisInstitucional />} />
+              <Route path="/materiais-responsaveis" element={<MateriaisResponsaveis />} />
+              <Route path="/comunicacao-institucional" element={<ComunicacaoInstitucional />} />
+              <Route path="/comunicacao-responsaveis" element={<ComunicacaoResponsaveis />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
