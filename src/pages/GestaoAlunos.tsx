@@ -68,6 +68,23 @@ const GestaoAlunos = () => {
   const [alunoEncontrado, setAlunoEncontrado] = useState<Aluno | null>(null);
   const [isBuscandoAluno, setIsBuscandoAluno] = useState(false);
 
+  // Funções para calcular estatísticas
+  const calcularEstatisticas = () => {
+    const totalAlunos = alunosData.length;
+    const alunosAtivos = alunosData.filter(aluno => aluno.status === 'ativo').length;
+    const turmas = [...new Set(alunosData.map(aluno => aluno.turma))].length;
+    const mediaAlunosPorTurma = totalAlunos > 0 ? Math.round(totalAlunos / turmas) : 0;
+    const taxaEngajamento = totalAlunos > 0 ? Math.round((alunosAtivos / totalAlunos) * 100) : 0;
+
+    return {
+      totalAlunos,
+      alunosAtivos,
+      turmas,
+      mediaAlunosPorTurma,
+      taxaEngajamento
+    };
+  };
+
   useEffect(() => {
     // Buscar dados de alunos e responsáveis do banco de dados
     console.log("Iniciando busca inicial de dados...");
@@ -373,17 +390,29 @@ const GestaoAlunos = () => {
       return;
     }
 
-    if (!usuario?.instituicaoId) {
+    // Log para debug
+    console.log("Dados do usuário atual:", {
+      usuario,
+      tipo: usuario?.tipo,
+      instituicaoId: usuario?.instituicaoId
+    });
+
+    // Verificação corrigida do login da instituição
+    if (!usuario || usuario.tipo !== 'instituicao') {
       toast.error("Você precisa estar logado como instituição para fazer esta operação.");
       return;
     }
 
     try {
       setIsVinculandoInstituicao(true);
-      console.log("Iniciando vinculação do aluno à instituição:", alunoEncontrado);
+      console.log("Iniciando vinculação do aluno à instituição:", {
+        aluno: alunoEncontrado,
+        instituicao: usuario
+      });
       
       const response = await api.post('/instituicoes/vincular-aluno', {
-        alunoId: alunoEncontrado.id
+        alunoId: alunoEncontrado.id,
+        instituicaoId: usuario.instituicaoId
       });
       
       console.log("Resposta da vinculação:", response.data);
@@ -651,10 +680,9 @@ const GestaoAlunos = () => {
           <Card className="p-4">
             <div className="bg-purple-50 p-4 rounded-lg">
               <p className="text-sm text-purple-600">Total de Alunos</p>
-              <p className="text-2xl font-bold text-purple-700">1.245</p>
-              <div className="flex items-center text-green-600 text-sm">
-                <ArrowUp className="h-4 w-4 mr-1" />
-                <span>+5% este mês</span>
+              <p className="text-2xl font-bold text-purple-700">{calcularEstatisticas().totalAlunos}</p>
+              <div className="flex items-center text-gray-600 text-sm">
+                <span>Total cadastrado</span>
               </div>
             </div>
           </Card>
@@ -662,10 +690,9 @@ const GestaoAlunos = () => {
           <Card className="p-4">
             <div className="bg-purple-50 p-4 rounded-lg">
               <p className="text-sm text-purple-600">Alunos Ativos</p>
-              <p className="text-2xl font-bold text-purple-700">1.198</p>
-              <div className="flex items-center text-green-600 text-sm">
-                <ArrowUp className="h-4 w-4 mr-1" />
-                <span>+3% este mês</span>
+              <p className="text-2xl font-bold text-purple-700">{calcularEstatisticas().alunosAtivos}</p>
+              <div className="flex items-center text-gray-600 text-sm">
+                <span>Alunos atualmente ativos</span>
               </div>
             </div>
           </Card>
@@ -673,9 +700,9 @@ const GestaoAlunos = () => {
           <Card className="p-4">
             <div className="bg-purple-50 p-4 rounded-lg">
               <p className="text-sm text-purple-600">Turmas</p>
-              <p className="text-2xl font-bold text-purple-700">42</p>
+              <p className="text-2xl font-bold text-purple-700">{calcularEstatisticas().turmas}</p>
               <div className="flex items-center text-gray-600 text-sm">
-                <span>Média de 30 alunos/turma</span>
+                <span>Média de {calcularEstatisticas().mediaAlunosPorTurma} alunos/turma</span>
               </div>
             </div>
           </Card>
@@ -683,10 +710,9 @@ const GestaoAlunos = () => {
           <Card className="p-4">
             <div className="bg-purple-50 p-4 rounded-lg">
               <p className="text-sm text-purple-600">Taxa de Engajamento</p>
-              <p className="text-2xl font-bold text-purple-700">87%</p>
-              <div className="flex items-center text-green-600 text-sm">
-                <ArrowUp className="h-4 w-4 mr-1" />
-                <span>+2% este mês</span>
+              <p className="text-2xl font-bold text-purple-700">{calcularEstatisticas().taxaEngajamento}%</p>
+              <div className="flex items-center text-gray-600 text-sm">
+                <span>Percentual de alunos ativos</span>
               </div>
             </div>
           </Card>

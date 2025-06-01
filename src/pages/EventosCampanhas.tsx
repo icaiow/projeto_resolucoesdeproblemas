@@ -1,146 +1,73 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ArrowLeft, Calendar, MapPin, Users, Tag, Search } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import { useEffect, useState } from "react";
 
 const EventosCampanhas = () => {
-  const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState("");
-
-  // Dados simulados dos eventos
-  const eventos = [
+  const { toast } = useToast();
+  const [eventos, setEventos] = useState([
     {
       id: 1,
-      titulo: "Semana de Prevenção ao Bullying",
-      data: "20/05/2024",
-      horario: "08:00 - 12:00",
-      local: "Auditório Principal",
-      tipo: "Campanha",
-      descricao: "Semana dedicada à conscientização e prevenção do bullying na escola.",
-      participantes: 120
+      titulo: "Semana de Conscientização contra o Bullying",
+      data: "15/06/2025",
+      descricao: "Uma semana inteira dedicada a atividades de conscientização sobre o bullying e seus impactos.",
+      local: "Online e presencial"
     },
     {
       id: 2,
-      titulo: "Palestra: Saúde Mental",
-      data: "25/05/2024",
-      horario: "14:00 - 16:00",
-      local: "Sala de Conferências",
-      tipo: "Evento",
-      descricao: "Palestra sobre saúde mental e bem-estar emocional.",
-      participantes: 80
+      titulo: "Palestra: Como identificar sinais de bullying",
+      data: "22/06/2025",
+      descricao: "Palestra com especialistas sobre como identificar sinais de bullying e como agir.",
+      local: "Auditório principal"
     },
     {
       id: 3,
-      titulo: "Campanha: Internet Segura",
-      data: "30/05/2024",
-      horario: "10:00 - 11:30",
-      local: "Laboratório de Informática",
-      tipo: "Campanha",
-      descricao: "Orientação sobre uso seguro da internet e redes sociais.",
-      participantes: 60
+      titulo: "Workshop de Empatia e Respeito",
+      data: "29/06/2025",
+      descricao: "Workshop interativo para desenvolver habilidades de empatia e respeito entre os alunos.",
+      local: "Sala de eventos"
     }
-  ];
+  ]);
 
-  const eventosFiltrados = eventos.filter(evento =>
-    evento.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    evento.descricao.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    // Simulação de carregamento de dados
+    toast({
+      title: "Eventos carregados",
+      description: "Lista de eventos e campanhas atualizada.",
+    });
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
-          <Button variant="outline" onClick={() => navigate("/home-alunos")}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Voltar
-          </Button>
-        </div>
-
-        <div>
-          <h1 className="text-2xl font-bold mb-2">Eventos e Campanhas</h1>
-          <p className="text-gray-600">
-            Acompanhe os eventos e campanhas da escola
-          </p>
-        </div>
-
-        <div className="relative">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-          <Input
-            placeholder="Buscar eventos..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-
-        <div className="grid gap-4">
-          {eventosFiltrados.map((evento) => (
-            <Card key={evento.id} className="p-6">
-              <div className="space-y-4">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-semibold text-lg">{evento.titulo}</h3>
-                    <span className={`inline-block px-2 py-1 rounded-full text-xs ${
-                      evento.tipo === "Campanha" 
-                        ? "bg-purple-100 text-purple-800" 
-                        : "bg-blue-100 text-blue-800"
-                    }`}>
-                      {evento.tipo}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
-                    <Users className="h-4 w-4" />
-                    <span>{evento.participantes} participantes</span>
-                  </div>
-                </div>
-
-                <p className="text-gray-600">{evento.descricao}</p>
-
-                <div className="grid grid-cols-3 gap-4 text-sm">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-gray-400" />
-                    <div>
-                      <p className="text-gray-500">Data</p>
-                      <p className="font-medium">{evento.data}</p>
-                      <p className="text-gray-500">{evento.horario}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-gray-400" />
-                    <div>
-                      <p className="text-gray-500">Local</p>
-                      <p className="font-medium">{evento.local}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Tag className="h-4 w-4 text-gray-400" />
-                    <div>
-                      <p className="text-gray-500">Tipo</p>
-                      <p className="font-medium">{evento.tipo}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <Button className="w-full">
-                  Participar do Evento
-                </Button>
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-6">Eventos e Campanhas</h1>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {eventos.map((evento) => (
+          <Card key={evento.id} className="shadow-md">
+            <CardHeader className="bg-green-50">
+              <CardTitle>{evento.titulo}</CardTitle>
+              <CardDescription>Data: {evento.data}</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-4">
+              <p className="mb-2">{evento.descricao}</p>
+              <p className="text-sm text-gray-600">Local: {evento.local}</p>
+              <div className="mt-4">
+                <Button variant="outline" className="mr-2">Mais detalhes</Button>
+                <Button>Participar</Button>
               </div>
-            </Card>
-          ))}
-        </div>
-
-        {eventosFiltrados.length === 0 && (
-          <Card className="p-6 text-center">
-            <p className="text-gray-500">
-              Nenhum evento encontrado com os termos de busca.
-            </p>
+            </CardContent>
           </Card>
-        )}
+        ))}
+      </div>
+      
+      <div className="mt-8">
+        <h2 className="text-xl font-semibold mb-4">Próximas Campanhas</h2>
+        <p className="text-gray-600">
+          Fique atento às próximas campanhas de conscientização e eventos relacionados à prevenção do bullying e promoção de um ambiente escolar saudável.
+        </p>
       </div>
     </div>
   );
 };
 
-export default EventosCampanhas; 
+export default EventosCampanhas;

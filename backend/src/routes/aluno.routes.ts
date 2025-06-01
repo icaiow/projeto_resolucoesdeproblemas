@@ -262,4 +262,49 @@ router.get('/buscar/:matricula', async (req, res) => {
   }
 });
 
+// Rota para buscar responsáveis vinculados ao aluno
+router.get('/responsaveis-vinculados', authMiddleware, async (req, res) => {
+  try {
+    const usuarioId = req.usuario?.id;
+    console.log('Buscando responsáveis vinculados para aluno:', usuarioId);
+
+    // Buscar o aluno pelo ID do usuário
+    const aluno = await prisma.aluno.findFirst({
+      where: { usuarioId },
+      include: {
+        responsaveis: {
+          include: {
+            responsavel: {
+              include: {
+                usuario: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (!aluno) {
+      console.log('Aluno não encontrado');
+      return res.status(404).json({ message: 'Aluno não encontrado' });
+    }
+
+    // Formatar os dados dos responsáveis
+    const responsaveisFormatados = aluno.responsaveis.map(vinculo => ({
+      id: vinculo.responsavel.id,
+      nome: vinculo.responsavel.usuario.nome,
+      email: vinculo.responsavel.usuario.email,
+      telefone: vinculo.responsavel.telefone,
+      parentesco: vinculo.parentesco,
+      foto: null
+    }));
+
+    console.log('Responsáveis formatados:', responsaveisFormatados);
+    res.json(responsaveisFormatados);
+  } catch (error) {
+    console.error('Erro ao buscar responsáveis vinculados:', error);
+    res.status(500).json({ message: 'Erro ao buscar responsáveis vinculados' });
+  }
+});
+
 export default router;
