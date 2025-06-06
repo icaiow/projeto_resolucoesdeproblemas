@@ -24,7 +24,6 @@ const LoginAluno = () => {
   const [novaMatricula, setNovaMatricula] = useState("");
   const [turmaId, setTurmaId] = useState("");
   const [dataNascimento, setDataNascimento] = useState("");
-  const [codigoInstituicao, setCodigoInstituicao] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -79,8 +78,7 @@ const LoginAluno = () => {
       tipo: 'aluno',
       matricula: novaMatricula,
       turmaId,
-      dataNascimento,
-      instituicaoId: codigoInstituicao || undefined
+      dataNascimento
     };
     console.log('Dados que serão enviados:', dadosCadastro);
     
@@ -106,7 +104,6 @@ const LoginAluno = () => {
       setNovaMatricula('');
       setTurmaId('');
       setDataNascimento('');
-      setCodigoInstituicao('');
       
     } catch (error) {
       console.error("Erro detalhado ao cadastrar aluno:", {
@@ -278,10 +275,6 @@ const LoginAluno = () => {
             <div>
               <Label htmlFor="dataNascimento">Data de Nascimento</Label>
               <Input id="dataNascimento" type="date" value={dataNascimento} onChange={e => setDataNascimento(e.target.value)} required />
-            </div>
-            <div>
-              <Label htmlFor="codigoInstituicao">Código da Instituição (opcional)</Label>
-              <Input id="codigoInstituicao" type="text" placeholder="Código fornecido pela sua escola" value={codigoInstituicao} onChange={e => setCodigoInstituicao(e.target.value)} />
             </div>
             <div>
               <Label htmlFor="senha">Senha</Label>

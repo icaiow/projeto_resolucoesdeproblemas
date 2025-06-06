@@ -8,6 +8,15 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
+interface DadosCadastroResponsavel {
+  nome: string;
+  email: string;
+  senha: string;
+  tipo: 'responsavel';
+  telefone?: string;
+  cpf?: string;
+}
+
 const LoginResponsavel = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -74,7 +83,7 @@ const LoginResponsavel = () => {
       setIsLoading(true);
       
       // Simplificar os dados ao máximo
-      const dadosCadastro = {
+      const dadosCadastro: DadosCadastroResponsavel = {
         nome,
         email: emailCadastro,
         senha,
@@ -110,7 +119,7 @@ const LoginResponsavel = () => {
       setConfirmarSenha('');
       setTelefone('');
       setCpf('');
-      setCodigoAluno('');
+      
       
     } catch (error) {
       console.error("Erro ao cadastrar responsável:", error);
@@ -280,10 +289,6 @@ const LoginResponsavel = () => {
             <div>
               <Label htmlFor="cpf">CPF</Label>
               <Input id="cpf" type="text" placeholder="000.000.000-00" value={cpf} onChange={e => setCpf(e.target.value)} required />
-            </div>
-            <div>
-              <Label htmlFor="codigoAluno">Código do Aluno (opcional)</Label>
-              <Input id="codigoAluno" type="text" placeholder="Código do aluno para vinculação" value={codigoAluno} onChange={e => setCodigoAluno(e.target.value)} />
             </div>
             <div>
               <Label htmlFor="senha">Senha</Label>
