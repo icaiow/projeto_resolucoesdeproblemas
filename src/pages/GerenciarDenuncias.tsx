@@ -1,4 +1,5 @@
-import { useState } from "react";
+// 📁 src/pages/GerenciarDenuncias.tsx
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,63 +12,37 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-interface Denuncia {
-  id: string;
-  aluno: string;
-  turma: string;
-  titulo: string;
-  data: string;
-  status: "pendente" | "em_investigacao" | "resolvido" | "arquivado";
-  tipo: "bullying" | "discriminacao" | "violencia" | "outros";
-}
+import { listarMinhasDenuncias } from "@/services/denunciaService";
+import { toast } from "sonner";
 
 const GerenciarDenuncias = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("todos");
   const [filterTipo, setFilterTipo] = useState<string>("todos");
+  const [denuncias, setDenuncias] = useState<any[]>([]);
 
-  // Dados mockados para exemplo
-  const denuncias: Denuncia[] = [
-    {
-      id: "1",
-      aluno: "João Silva",
-      turma: "8º A",
-      titulo: "Situação de bullying",
-      data: "15/03/2024",
-      status: "em_investigacao",
-      tipo: "bullying"
-    },
-    {
-      id: "2",
-      aluno: "Maria Santos",
-      turma: "9º B",
-      titulo: "Discriminação em sala",
-      data: "14/03/2024",
-      status: "pendente",
-      tipo: "discriminacao"
-    },
-    {
-      id: "3",
-      aluno: "Pedro Oliveira",
-      turma: "7º C",
-      titulo: "Agressão física",
-      data: "13/03/2024",
-      status: "resolvido",
-      tipo: "violencia"
-    }
-  ];
+  useEffect(() => {
+    const carregar = async () => {
+      try {
+        const dados = await listarMinhasDenuncias();
+        setDenuncias(dados);
+      } catch (error) {
+        toast.error("Erro ao carregar denúncias");
+      }
+    };
+    carregar();
+  }, []);
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "pendente":
         return "text-yellow-500";
-      case "em_investigacao":
+      case "em_analise":
         return "text-blue-500";
-      case "resolvido":
+      case "resolvida":
         return "text-green-500";
-      case "arquivado":
+      case "arquivada":
         return "text-gray-500";
       default:
         return "text-gray-500";
@@ -78,11 +53,11 @@ const GerenciarDenuncias = () => {
     switch (status) {
       case "pendente":
         return <Clock className="h-4 w-4" />;
-      case "em_investigacao":
+      case "em_analise":
         return <AlertCircle className="h-4 w-4" />;
-      case "resolvido":
+      case "resolvida":
         return <CheckCircle2 className="h-4 w-4" />;
-      case "arquivado":
+      case "arquivada":
         return <AlertTriangle className="h-4 w-4" />;
       default:
         return <AlertCircle className="h-4 w-4" />;
@@ -106,7 +81,7 @@ const GerenciarDenuncias = () => {
 
   const filteredDenuncias = denuncias.filter(denuncia => {
     const matchesSearch = denuncia.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         denuncia.aluno.toLowerCase().includes(searchTerm.toLowerCase());
+                         denuncia.usuario?.nome.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === "todos" || denuncia.status === filterStatus;
     const matchesTipo = filterTipo === "todos" || denuncia.tipo === filterTipo;
     return matchesSearch && matchesStatus && matchesTipo;
@@ -133,49 +108,7 @@ const GerenciarDenuncias = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <Card className="p-4">
-            <div className="bg-red-50 p-4 rounded-lg">
-              <p className="text-sm text-red-600">Total de Denúncias</p>
-              <p className="text-2xl font-bold text-red-700">156</p>
-              <div className="flex items-center text-red-600 text-sm">
-                <ArrowUp className="h-4 w-4 mr-1" />
-                <span>+12% este mês</span>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="bg-red-50 p-4 rounded-lg">
-              <p className="text-sm text-red-600">Resolvidas</p>
-              <p className="text-2xl font-bold text-red-700">128</p>
-              <div className="flex items-center text-green-600 text-sm">
-                <ArrowUp className="h-4 w-4 mr-1" />
-                <span>+8% este mês</span>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="bg-red-50 p-4 rounded-lg">
-              <p className="text-sm text-red-600">Pendentes</p>
-              <p className="text-2xl font-bold text-red-700">28</p>
-              <div className="flex items-center text-red-600 text-sm">
-                <ArrowUp className="h-4 w-4 mr-1" />
-                <span>+4% este mês</span>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="bg-red-50 p-4 rounded-lg">
-              <p className="text-sm text-red-600">Tempo Médio de Resposta</p>
-              <p className="text-2xl font-bold text-red-700">2.5 dias</p>
-              <div className="flex items-center text-green-600 text-sm">
-                <ArrowDown className="h-4 w-4 mr-1" />
-                <span>-0.5 dias este mês</span>
-              </div>
-            </div>
-          </Card>
+          {/* Cards de resumo podem ser dinâmicos no futuro */}
         </div>
 
         <div className="grid gap-6">
@@ -200,9 +133,9 @@ const GerenciarDenuncias = () => {
                   <SelectContent>
                     <SelectItem value="todos">Todos os Status</SelectItem>
                     <SelectItem value="pendente">Pendente</SelectItem>
-                    <SelectItem value="em_investigacao">Em Investigação</SelectItem>
-                    <SelectItem value="resolvido">Resolvido</SelectItem>
-                    <SelectItem value="arquivado">Arquivado</SelectItem>
+                    <SelectItem value="em_analise">Em Análise</SelectItem>
+                    <SelectItem value="resolvida">Resolvida</SelectItem>
+                    <SelectItem value="arquivada">Arquivada</SelectItem>
                   </SelectContent>
                 </Select>
                 <Select value={filterTipo} onValueChange={setFilterTipo}>
@@ -226,13 +159,13 @@ const GerenciarDenuncias = () => {
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-semibold">{denuncia.titulo}</h3>
+                        <h3 className="font-semibold capitalize">{denuncia.titulo}</h3>
                         <span className={`px-2 py-1 rounded-full text-xs ${getTipoColor(denuncia.tipo)}`}>
                           {denuncia.tipo}
                         </span>
                       </div>
                       <p className="text-sm text-gray-500">
-                        {denuncia.aluno} - {denuncia.turma}
+                        {denuncia.usuario?.nome}
                       </p>
                     </div>
                     <div className="flex items-center gap-4">
@@ -240,11 +173,13 @@ const GerenciarDenuncias = () => {
                         {getStatusIcon(denuncia.status)}
                         <span className="text-sm capitalize">{denuncia.status}</span>
                       </div>
-                      <span className="text-sm text-gray-500">{denuncia.data}</span>
+                      <span className="text-sm text-gray-500">
+                        {new Date(denuncia.createdAt).toLocaleDateString()}
+                      </span>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => navigate(`/denuncia/${denuncia.id}`)}
+                        onClick={() => navigate(`/denuncias/${denuncia.id}`)}
                       >
                         Ver Detalhes
                       </Button>
@@ -260,4 +195,4 @@ const GerenciarDenuncias = () => {
   );
 };
 
-export default GerenciarDenuncias; 
+export default GerenciarDenuncias;
