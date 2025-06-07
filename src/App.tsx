@@ -36,7 +36,6 @@ import GerenciarMateriais from "./pages/GerenciarMateriais";
 import Relatorios from "./pages/Relatorios";
 import Configuracoes from "./pages/Configuracoes";
 import GestaoAlunos from "./pages/GestaoAlunos";
-import PerfilAluno from "./pages/PerfilAluno";
 import ResponsaveisAluno from "./pages/ResponsaveisAluno";
 import EscutaAluno from "./pages/EscutaAluno";
 import EventosCampanhas from "./pages/EventosCampanhas";
@@ -97,8 +96,6 @@ const App = () => (
               <Route path="/relatorios" element={<Relatorios />} />
               <Route path="/configuracoes" element={<Configuracoes />} />
               <Route path="/gestao-alunos" element={<GestaoAlunos />} />
-              <Route path="/perfil-aluno" element={<PerfilAluno />} />
-              <Route path="/perfil-aluno/:id" element={<PerfilAluno />} />
               <Route path="/responsaveis-aluno" element={<ResponsaveisAluno />} />
               <Route path="/escuta-aluno" element={<EscutaAluno />} />
               <Route path="/eventos-campanhas" element={<EventosCampanhas />} />

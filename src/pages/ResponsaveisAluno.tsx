@@ -15,6 +15,34 @@ interface Responsavel {
   foto: string | null;
 }
 
+// Dados mockados para simulação
+const mockResponsaveis: Responsavel[] = [
+  {
+    id: 1,
+    nome: "Maria Silva",
+    parentesco: "Mãe",
+    telefone: "(11) 98765-4321",
+    email: "maria.silva@email.com",
+    foto: null
+  },
+  {
+    id: 2,
+    nome: "João Silva",
+    parentesco: "Pai",
+    telefone: "(11) 91234-5678",
+    email: "joao.silva@email.com",
+    foto: null
+  },
+  {
+    id: 3,
+    nome: "Ana Oliveira",
+    parentesco: "Avó",
+    telefone: "(11) 99876-5432",
+    email: "ana.oliveira@email.com",
+    foto: null
+  }
+];
+
 const ResponsaveisAluno = () => {
   const navigate = useNavigate();
   const [responsaveis, setResponsaveis] = useState<Responsavel[]>([]);
@@ -42,8 +70,9 @@ const ResponsaveisAluno = () => {
         setResponsaveis(response.data);
       } catch (error) {
         console.error('Erro ao carregar responsáveis:', error);
-        toast.error('Erro ao carregar dados dos responsáveis. Por favor, tente novamente.');
-        setResponsaveis([]);
+        toast.error('Usando dados de exemplo para demonstração.');
+        // Usar dados mockados em caso de erro
+        setResponsaveis(mockResponsaveis);
       } finally {
         setIsLoading(false);
       }

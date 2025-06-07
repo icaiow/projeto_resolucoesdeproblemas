@@ -107,27 +107,6 @@ const HomeAlunos = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Card className="p-6 hover:shadow-md transition-shadow">
-          <div className="flex flex-col h-full">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
-                <User className="h-6 w-6 text-blue-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold">Meu Perfil</h3>
-                <p className="text-sm text-gray-500">Visualize e edite suas informações</p>
-              </div>
-            </div>
-            <div className="mt-auto">
-              <Button 
-                onClick={() => navigate("/perfil-aluno")}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                Ver Perfil
-              </Button>
-            </div>
-          </div>
-        </Card>
 
         <Card className="p-6 hover:shadow-md transition-shadow">
           <div className="flex flex-col h-full">
