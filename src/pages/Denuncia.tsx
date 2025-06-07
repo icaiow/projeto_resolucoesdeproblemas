@@ -1,3 +1,4 @@
+// 📁 src/pages/Denuncia.tsx
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Card } from "@/components/ui/card";
@@ -8,57 +9,72 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertTriangle, ArrowLeft, Clock, CheckCircle2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { criarDenuncia } from "@/services/denunciaService";
 
 const Denuncia = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [tipoDenuncia, setTipoDenuncia] = useState("");
   const [descricao, setDescricao] = useState("");
-  const [aluno, setAluno] = useState("");
+  const [nomeAgressor, setNomeAgressor] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isViewMode, setIsViewMode] = useState(false);
   const [denuncia, setDenuncia] = useState<any>(null);
 
-  // Dados simulados dos alunos
-  const alunos = [
-    { id: 1, nome: "João Silva", turma: "8º Ano A" },
-    { id: 2, nome: "Ana Silva", turma: "6º Ano B" },
-  ];
-
   useEffect(() => {
-    if (id) {
+    const carregarDenuncia = async () => {
+      if (!id) return;
       setIsViewMode(true);
-      // Simulação de busca de denúncia
-      setDenuncia({
-        id,
-        aluno: "João Silva",
-        tipo: "Bullying",
-        data: "15/03/2024",
-        status: "Em análise",
-        descricao: "Situação de bullying relatada durante o intervalo.",
-      });
-    }
+
+      try {
+        const token = localStorage.getItem("token");
+        const resposta = await fetch(`/api/denuncias/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!resposta.ok) throw new Error("Erro ao buscar denúncia");
+        const dados = await resposta.json();
+        setDenuncia(dados);
+      } catch (error) {
+        console.error("Erro ao carregar denúncia:", error);
+        toast.error("Erro ao carregar detalhes da denúncia");
+      }
+    };
+
+    carregarDenuncia();
   }, [id]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulação de envio
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      await criarDenuncia({
+        titulo: `Denúncia - ${tipoDenuncia}`,
+        descricao,
+        tipo: tipoDenuncia,
+        anonima: false,
+        nomeAgressor: nomeAgressor || null
+      });
+
       toast.success("Denúncia enviada com sucesso!");
-      navigate("/home-responsaveis");
-    }, 1500);
+      navigate("/historico-denuncias");
+    } catch (error) {
+      console.error("Erro ao enviar denúncia:", error);
+      toast.error("Erro ao enviar denúncia");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "Em análise":
+      case "pendente":
         return "bg-amber-100 text-amber-800";
-      case "Em andamento":
+      case "em_analise":
         return "bg-blue-100 text-blue-800";
-      case "Concluído":
+      case "resolvida":
         return "bg-green-100 text-green-800";
       default:
         return "bg-gray-100 text-gray-800";
@@ -67,11 +83,11 @@ const Denuncia = () => {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "Em análise":
+      case "pendente":
         return <Clock className="h-4 w-4" />;
-      case "Em andamento":
+      case "em_analise":
         return <AlertCircle className="h-4 w-4" />;
-      case "Concluído":
+      case "resolvida":
         return <CheckCircle2 className="h-4 w-4" />;
       default:
         return <AlertCircle className="h-4 w-4" />;
@@ -109,17 +125,24 @@ const Denuncia = () => {
               <div className="space-y-4">
                 <div>
                   <Label>Tipo de Denúncia</Label>
-                  <p className="mt-1">{denuncia?.tipo}</p>
+                  <p className="mt-1 capitalize">{denuncia?.tipo}</p>
                 </div>
 
+                {denuncia?.nomeAgressor && (
+                  <div>
+                    <Label>Nome do Agressor</Label>
+                    <p className="mt-1">{denuncia?.nomeAgressor}</p>
+                  </div>
+                )}
+
                 <div>
-                  <Label>Aluno</Label>
-                  <p className="mt-1">{denuncia?.aluno}</p>
+                  <Label>Usuário</Label>
+                  <p className="mt-1">{denuncia?.usuario?.nome}</p>
                 </div>
 
                 <div>
                   <Label>Data</Label>
-                  <p className="mt-1">{denuncia?.data}</p>
+                  <p className="mt-1">{new Date(denuncia?.createdAt).toLocaleDateString()}</p>
                 </div>
 
                 <div>
@@ -153,19 +176,13 @@ const Denuncia = () => {
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="aluno">Aluno</Label>
-                  <Select value={aluno} onValueChange={setAluno} required>
-                    <SelectTrigger id="aluno">
-                      <SelectValue placeholder="Selecione o aluno" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {alunos.map((aluno) => (
-                        <SelectItem key={aluno.id} value={aluno.id.toString()}>
-                          {aluno.nome} - {aluno.turma}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="agressor">Nome do Agressor</Label>
+                  <Input
+                    id="agressor"
+                    placeholder="Digite o nome do agressor (se souber)"
+                    value={nomeAgressor}
+                    onChange={(e) => setNomeAgressor(e.target.value)}
+                  />
                 </div>
 
                 <div className="space-y-2">

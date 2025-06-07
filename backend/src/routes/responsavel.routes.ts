@@ -438,4 +438,40 @@ router.put('/perfil', authMiddleware, async (req, res) => {
   }
 });
 
+router.get('/alunos', authMiddleware, async (req, res) => {
+  try {
+    const usuarioId = req.usuario?.id;
+
+    const responsavel = await prisma.responsavel.findUnique({
+      where: { usuarioId },
+      include: {
+        alunos: {
+          include: {
+            aluno: {
+              include: {
+                usuario: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (!responsavel) {
+      return res.status(404).json({ message: 'Responsável não encontrado' });
+    }
+
+    const alunos = responsavel.alunos.map((vinculo) => ({
+      id: vinculo.aluno.id,
+      nome: vinculo.aluno.usuario.nome,
+      turma: vinculo.aluno.turmaId
+    }));
+
+    res.json(alunos);
+  } catch (error) {
+    console.error('Erro ao buscar alunos vinculados:', error);
+    res.status(500).json({ message: 'Erro ao buscar alunos' });
+  }
+});
+
 export default router;
