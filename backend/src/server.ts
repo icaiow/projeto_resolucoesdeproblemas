@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
+import path from 'path'; // ⚠️ IMPORTANTE: adicione isso para usar path.join()
 
 // Rotas
 import authRoutes from './routes/auth.routes';
@@ -37,7 +38,10 @@ app.use((req, res, next) => {
   next();
 });
 
-// Rotas
+// ✅ Middleware para servir arquivos estáticos da pasta "uploads"
+app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+
+// Rotas da API
 app.use('/api/auth', authRoutes);
 app.use('/api/alunos', alunoRoutes);
 app.use('/api/responsaveis', responsavelRoutes);

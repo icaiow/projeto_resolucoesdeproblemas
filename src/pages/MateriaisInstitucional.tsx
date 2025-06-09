@@ -57,16 +57,21 @@ const MateriaisInstitucional = () => {
         </div>
 
         <Card className="p-6">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center">
-              <BookOpen className="h-6 w-6 text-green-600" />
+          <div className="flex items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center">
+                <BookOpen className="h-6 w-6 text-green-600" />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold">Materiais Disponíveis</h2>
+                <p className="text-sm text-gray-500">
+                  Gerencie materiais sobre acolhimento e prevenção
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-xl font-semibold">Materiais Disponíveis</h2>
-              <p className="text-sm text-gray-500">
-                Gerencie materiais sobre acolhimento e prevenção
-              </p>
-            </div>
+            <Button onClick={() => navigate("/documentos/novo")}>
+              + Enviar Novo Material
+            </Button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -106,4 +111,4 @@ const MateriaisInstitucional = () => {
   );
 };
 
-export default MateriaisInstitucional; 
+export default MateriaisInstitucional;

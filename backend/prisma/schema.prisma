@@ -23,6 +23,7 @@ model Usuario {
   instituicao Instituicao?
   denuncias   Denuncia[]
   comentarios Comentario[]
+  documentos  Documento[]
 }
 
 model Aluno {
@@ -77,6 +78,7 @@ model Instituicao {
 
   // Relações
   alunos  Aluno[]
+  documentos Documento[]
 }
 
 model Denuncia {
@@ -94,6 +96,10 @@ model Denuncia {
   // Relações
   usuario     Usuario?     @relation(fields: [usuarioId], references: [id])
   comentarios Comentario[]
+  aluno       Aluno        @relation(fields: [alunoId], references: [id])
+  alunoId     Int
+  instituicao Instituicao  @relation(fields: [instituicaoId], references: [id])
+  instituicaoId Int
 }
 
 model Comentario {
@@ -109,10 +115,17 @@ model Comentario {
 }
 
 model Documento {
-  id        Int      @id @default(autoincrement())
-  titulo    String
-  descricao String
-  url       String
-  tipo      String // "circular", "aviso", "documento"
-  createdAt DateTime @default(now())
+  id            Int         @id @default(autoincrement())
+  titulo        String
+  descricao     String?
+  tipo          String      // pdf, video, documento, outros
+  url           String      // caminho do arquivo
+  tamanho       Int?        // tamanho em bytes
+  nomeOriginal  String?     // nome original do arquivo
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  usuario       Usuario     @relation(fields: [usuarioId], references: [id])
+  usuarioId     Int
+  instituicao   Instituicao? @relation(fields: [instituicaoId], references: [id])
+  instituicaoId Int?
 }

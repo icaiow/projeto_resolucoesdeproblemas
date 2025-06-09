@@ -48,6 +48,10 @@ import MateriaisInstitucional from "./pages/MateriaisInstitucional";
 import MateriaisResponsaveis from "./pages/MateriaisResponsaveis";
 import ComunicacaoInstitucional from "./pages/ComunicacaoInstitucional";
 import ComunicacaoResponsaveis from "./pages/ComunicacaoResponsaveis";
+import UploadDocumento from "./pages/UploadDocumento";
+
+
+
 
 const queryClient = new QueryClient();
 
@@ -104,6 +108,7 @@ const App = () => (
               <Route path="/materiais-responsaveis" element={<MateriaisResponsaveis />} />
               <Route path="/comunicacao-institucional" element={<ComunicacaoInstitucional />} />
               <Route path="/comunicacao-responsaveis" element={<ComunicacaoResponsaveis />} />
+              <Route path="/documentos/novo" element={<UploadDocumento />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
