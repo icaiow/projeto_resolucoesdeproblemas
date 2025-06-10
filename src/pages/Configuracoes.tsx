@@ -4,7 +4,6 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Settings, Bell, Lock, Users, FileText, Mail } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 
 const Configuracoes = () => {
   const navigate = useNavigate();
@@ -94,34 +93,6 @@ const Configuracoes = () => {
                 checked={email}
                 onCheckedChange={setEmail}
               />
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-6">
-          <h2 className="text-lg font-semibold mb-4">Preferências de Exibição</h2>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="theme">Tema</Label>
-              <select
-                id="theme"
-                className="rounded-md border border-gray-300 px-3 py-2"
-              >
-                <option value="light">Claro</option>
-                <option value="dark">Escuro</option>
-                <option value="system">Sistema</option>
-              </select>
-            </div>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="language">Idioma</Label>
-              <select
-                id="language"
-                className="rounded-md border border-gray-300 px-3 py-2"
-              >
-                <option value="pt">Português</option>
-                <option value="en">English</option>
-                <option value="es">Español</option>
-              </select>
             </div>
           </div>
         </Card>

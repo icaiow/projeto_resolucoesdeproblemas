@@ -28,8 +28,8 @@ const Index = () => {
             </p>
           </div>
         </div>
-      </div>
-
+            </div>
+            
       {/* Cards Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -53,7 +53,7 @@ const Index = () => {
               <div className="flex flex-col items-center text-center space-y-4">
                 <div className="bg-green-600 p-4 rounded-full mb-4 shadow-lg">
                   <GraduationCap className="h-10 w-10 text-white" />
-                </div>
+            </div>
                 <h2 className="text-2xl font-title font-semibold mb-2 text-gray-900">Aluno</h2>
                 <p className="text-gray-600">Acesso para alunos da instituição</p>
                 <Button variant="outline" className="mt-4 w-full">
@@ -78,7 +78,7 @@ const Index = () => {
             </Card>
           </Link>
         </div>
-      </div>
+          </div>
 
       {/* Features Section */}
       <div className="bg-white py-16">

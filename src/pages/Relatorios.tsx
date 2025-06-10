@@ -333,33 +333,33 @@ const Relatorios = () => {
             {filteredRelatorios.map((relatorio) => (
               <Card key={relatorio.id} className="p-4 hover:shadow-md transition-shadow">
                 <div className="flex flex-col gap-4">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold">{relatorio.titulo}</h3>
-                        <span className={`px-2 py-1 rounded-full text-xs ${getTipoColor(relatorio.tipo)}`}>
-                          {relatorio.tipo}
-                        </span>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold">{relatorio.titulo}</h3>
+                      <span className={`px-2 py-1 rounded-full text-xs ${getTipoColor(relatorio.tipo)}`}>
+                        {relatorio.tipo}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="h-4 w-4" />
+                        <span>{relatorio.periodo}</span>
                       </div>
-                      <div className="flex items-center gap-4 text-sm text-gray-500">
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4" />
-                          <span>{relatorio.periodo}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <span>Gerado em: {relatorio.data}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <span>{relatorio.arquivo}</span>
-                          <span>•</span>
-                          <span>{relatorio.tamanho}</span>
-                        </div>
+                      <div className="flex items-center gap-1">
+                        <span>Gerado em: {relatorio.data}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span>{relatorio.arquivo}</span>
+                        <span>•</span>
+                        <span>{relatorio.tamanho}</span>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm">
-                      <Download className="h-4 w-4 mr-2" />
-                      Baixar
-                    </Button>
+                  </div>
+                  <Button variant="outline" size="sm">
+                    <Download className="h-4 w-4 mr-2" />
+                    Baixar
+                  </Button>
                   </div>
                   {renderGrafico(relatorio.tipo)}
                 </div>
