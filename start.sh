@@ -15,7 +15,7 @@ cat /etc/nginx/conf.d/default.conf
 
 # Substituir a URL do backend no nginx.conf
 echo "=== Substituindo URL do backend ==="
-sed -i "s|proxy_pass.*|proxy_pass https://nohate-backend-production.up.railway.app;|" /etc/nginx/conf.d/default.conf
+sed -i "s|proxy_pass.*|proxy_pass https://nohate-backend.onrender.com;|" /etc/nginx/conf.d/default.conf
 
 # Mostrar conteúdo após substituição
 echo "=== Conteúdo após substituição ==="

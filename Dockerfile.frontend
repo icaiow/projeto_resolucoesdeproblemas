@@ -27,9 +27,13 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copiar e configurar o script de inicialização
 COPY start.sh /start.sh
-RUN chmod +x /start.sh
+
+# Converter para formato Unix e tornar executável
+RUN sed -i 's/\r$//' /start.sh && \
+    chmod +x /start.sh && \
+    dos2unix /start.sh
 
 EXPOSE 80
 
 # Usar o script de inicialização
-ENTRYPOINT ["/start.sh"] 
+ENTRYPOINT ["/bin/sh", "/start.sh"]
